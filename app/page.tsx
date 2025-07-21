@@ -9,10 +9,21 @@ export default function HomePage() {
   const auth = useAuth();
   const { tenantId } = useTenant();
 
+  // 최초 진입 시 tenantId 세팅 및 없으면 /select-tenant로 이동
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantIdFromUrl = urlParams.get('tenantId');
+    if (tenantIdFromUrl) {
+      localStorage.setItem('currentTenantId', tenantIdFromUrl);
+    }
+    if (!tenantIdFromUrl && !localStorage.getItem('currentTenantId')) {
+      window.location.replace('/select-tenant');
+    }
+  }, []);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('code')) {
-      // 인증 성공 후 쿼리스트링 제거
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [auth.isAuthenticated]);
@@ -20,30 +31,21 @@ export default function HomePage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-
-    // 콜백 처리 중이면 아무것도 하지 않음
     if (code) return;
-
-    // 인증 완료 후 대시보드로 이동 (한 번만)
     if (auth.isAuthenticated && auth.user && window.location.pathname === '/') {
       window.location.replace('/dashboard');
       return;
     }
-
-    // 테넌트가 없으면 테넌트 선택으로
     if (!tenantId && !auth.isLoading) {
       window.location.replace('/select-tenant');
       return;
     }
-
-    // 테넌트는 있지만 인증되지 않았으면 로그인으로
     if (tenantId && !auth.isAuthenticated && !auth.isLoading && !code) {
       window.location.replace('/auth/login');
       return;
     }
   }, [auth.isAuthenticated, auth.user, auth.isLoading, tenantId]);
 
-  // 로딩 중이거나 콜백 처리 중
   if (auth.isLoading || new URLSearchParams(window.location.search).get('code')) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -62,7 +64,6 @@ export default function HomePage() {
     );
   }
 
-  // 기본 로딩 화면
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
       <div className="text-center">
