@@ -9,7 +9,7 @@ export default function HomePage() {
   const auth = useAuth();
   const { tenantId } = useTenant();
 
-  // 최초 진입 시 tenantId 세팅 및 없으면 /select-tenant로 이동
+  // 최초 진입 시 tenantId 체크 및 세팅
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tenantIdFromUrl = urlParams.get('tenantId');

@@ -54,7 +54,28 @@ export function MultiTenantAuthProvider({ children }: MultiTenantAuthProviderPro
   console.log('🔐 MultiTenantAuthProvider render:', { tenantId, hasConfig: !!tenantConfig, loading });
 
   // 테넌트 설정이 로드되지 않았으면 로딩 표시
-  if (loading || !tenantId || !tenantConfig) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600">테넌트 설정을 로드하는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // tenantId가 없으면 테넌트 선택 페이지로 리다이렉트
+  if (!tenantId) {
+    if (typeof window !== 'undefined') {
+      console.log('No tenantId in AuthProvider, redirecting to select-tenant');
+      window.location.replace('/select-tenant');
+    }
+    return null;
+  }
+
+  // tenantConfig가 없으면 설정 로드 중
+  if (!tenantConfig) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
