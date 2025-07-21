@@ -20,32 +20,78 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // 테넌트 ID 설정 및 설정 정보 로드
+  console.log('🏠 Simple TenantProvider:', { tenantId, mounted, loading });
+
+  // 마운트 확인
+  useEffect(() => {
+    console.log('🏠 MOUNTED!');
+    setMounted(true);
+    
+    // localStorage에서 직접 읽기
+    const saved = localStorage.getItem('currentTenantId');
+    console.log('🏠 Direct localStorage read:', saved);
+    
+    if (saved) {
+      console.log('🏠 Setting saved tenantId:', saved);
+      setTenantIdState(saved);
+    }
+  }, []);
+
+  // tenantId가 설정되면 자동으로 설정 로드
+  useEffect(() => {
+    console.log('🏠 TenantId effect triggered:', { tenantId, hasConfig: !!tenantConfig, loading, mounted });
+    
+    if (mounted && tenantId && !tenantConfig && !loading) {
+      console.log('🏠 Auto-loading config for restored tenant:', tenantId);
+      setTenantId(tenantId);
+    }
+  }, [tenantId, tenantConfig, loading, mounted]);
+
+  // 테넌트 ID 설정 함수
   const setTenantId = async (id: string) => {
+    console.log('🏠 setTenantId called:', id);
+    
+    // 이미 같은 tenantId로 설정된 경우 중복 실행 방지
     if (tenantId === id && tenantConfig) {
-      // 이미 같은 tenantId로 초기화된 경우 fetch 생략
+      console.log('🏠 Already configured for tenantId:', id);
       return;
     }
-    console.log('setTenantId called with:', id);
+    
     setLoading(true);
     setError(null);
     
     try {
-      // AWS SaaS Factory 패턴: ConfigParams 조회 (앱 초기화용)
-      const configParams = await tenantConfigService.getConfigParams(id);
-      console.log('ConfigParams loaded:', configParams);
+      // localStorage 저장
+      localStorage.setItem('currentTenantId', id);
+      console.log('🏠 Saved to localStorage:', id);
       
-      // ConfigParams를 TenantConfig 형태로 변환
+      // 상태 설정 (이미 같은 값이면 스킵)
+      if (tenantId !== id) {
+        setTenantIdState(id);
+        console.log('🏠 State updated with tenantId:', id);
+      }
+      
+      // 설정 로드 (간소화)
+      console.log('🏠 About to fetch config params...');
+      const configParams = await tenantConfigService.getConfigParams(id);
+      console.log('🏠 Config loaded:', configParams);
+      
+      // 설정 검증
+      if (!configParams || !configParams.authServer || !configParams.appClientId || !configParams.redirectUrl) {
+        throw new Error('유효하지 않은 테넌트 설정입니다. 필수 필드가 누락되었습니다.');
+      }
+      
       const config: TenantConfig = {
         TENANT_ID: id,
         AUTH_CLEAR_HASH_AFTER_LOGIN: false,
         AUTH_CLIENT_ID: configParams.appClientId,
-        AUTH_REDIRECT_URI: configParams.redirectUrl, // 원래 ConfigParams의 redirectUrl 사용 (Cognito에 등록된 URL)
+        AUTH_REDIRECT_URI: configParams.redirectUrl,
         AUTH_SERVER: configParams.authServer,
         AUTH_SESSION_CHECKS_ENABLED: true,
         AUTH_SHOW_DEBUG_INFO: true,
-        AUTH_SR_REDIRECT_URI: configParams.redirectUrl, // 원래 ConfigParams의 redirectUrl 사용
+        AUTH_SR_REDIRECT_URI: configParams.redirectUrl,
         AUTH_SR_TIMEOUT: 10000,
         AUTH_TIMEOUT_FACTOR: 0.75,
         AUTH_USE_SR: false,
@@ -55,45 +101,28 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         TENANT_EMAIL: 'admin@example.com'
       };
       
-      setTenantIdState(id);
       setTenantConfig(config);
-      console.log('Tenant context updated:', { id, config });
+      console.log('🏠 Config set successfully:', config);
       
-      // localStorage에 테넌트 ID 저장
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('currentTenantId', id);
-      }
     } catch (err) {
-      console.error('setTenantId error:', err);
-      setError(err instanceof Error ? err.message : '테넌트 설정을 불러오는 중 오류가 발생했습니다.');
+      console.error('🏠 setTenantId error:', err);
+      setError(err instanceof Error ? err.message : '설정 오류');
+      // 오류 시 상태 초기화
+      setTenantIdState(null);
+      setTenantConfig(null);
+      localStorage.removeItem('currentTenantId');
     } finally {
       setLoading(false);
-      console.log('setTenantId completed, loading set to false');
+      console.log('🏠 setTenantId completed, loading:', false);
     }
   };
 
-  // 테넌트 정보 초기화
   const clearTenant = () => {
     setTenantIdState(null);
     setTenantConfig(null);
     setError(null);
-    
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('currentTenantId');
-    }
+    localStorage.removeItem('currentTenantId');
   };
-
-  // 초기 로드 시 localStorage/sessionStorage에서 테넌트 ID 복원
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTenantId = localStorage.getItem('currentTenantId') || sessionStorage.getItem('tenantId');
-      console.log('TenantContext init:', { savedTenantId, currentTenantId: tenantId });
-      if (savedTenantId && !tenantId && !loading) {
-        console.log('Restoring tenant ID from storage:', savedTenantId);
-        setTenantId(savedTenantId);
-      }
-    }
-  }, []); // 빈 의존성 배열로 변경하여 초기 한번만 실행
 
   const value: TenantContextType = {
     tenantId,
@@ -103,6 +132,15 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     loading,
     error
   };
+
+  // 마운트되지 않았으면 로딩 표시
+  if (!mounted) {
+    return (
+      <TenantContext.Provider value={value}>
+        <div>Loading...</div>
+      </TenantContext.Provider>
+    );
+  }
 
   return (
     <TenantContext.Provider value={value}>

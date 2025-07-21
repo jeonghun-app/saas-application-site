@@ -80,37 +80,48 @@ export default function SelectTenantPage() {
     setError(null);
 
     try {
-      // 테넌트 유효성 검증
-      const isValid = await validateTenant(tenantId);
-      if (!isValid) {
-        return;
-      }
+      console.log('🚀 Starting tenant selection process...');
+      
+      // localStorage에 즉시 저장
+      localStorage.setItem('currentTenantId', tenantId);
+      sessionStorage.setItem('tenantId', tenantId);
+      console.log('🚀 Stored tenant ID:', tenantId);
 
-      // 테넌트 ID 설정 (이미 검증된 설정이 로드됨)
+      // 서비스 헬퍼에 설정
       serviceHelper.setTenantId(tenantId);
+      console.log('🚀 Set in service helper');
+      
+      // 테넌트 컨텍스트에 설정
+      console.log('🚀 About to call context setTenantId...');
       await setTenantId(tenantId);
+      console.log('🚀 Context setTenantId completed');
       
-      console.log('🚀 About to navigate to /auth/login');
+      console.log('🚀 Redirecting to auth/login...');
       
-      // 테넌트 ID 저장
-      window.localStorage.setItem('currentTenantId', tenantId);
-      window.sessionStorage.setItem('tenantId', tenantId);
-      
-      console.log('🚀 Stored tenant ID, now navigating...');
-      
+      // 설정 완료 후 리다이렉트
       window.location.href = '/auth/login';
       
     } catch (err) {
-      setError('테넌트 선택 중 오류가 발생했습니다.');
-      console.error('Error selecting tenant:', err);
-    } finally {
+      console.error('🚀 Error in handleTenantSelect:', err);
+      setError('테넌트 선택 중 오류가 발생했습니다: ' + (err instanceof Error ? err.message : '알 수 없는 오류'));
       setLoading(false);
     }
   };
 
-  const handleCustomTenantSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCustomTenantSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleTenantSelect(customTenantId);
+    
+    if (!customTenantId.trim()) {
+      setError('테넌트 ID를 입력해주세요.');
+      return;
+    }
+
+    // 먼저 검증 수행
+    const isValid = await validateTenant(customTenantId);
+    if (isValid) {
+      // 검증 성공 시 테넌트 선택
+      await handleTenantSelect(customTenantId);
+    }
   };
 
   const handleValidateClick = async () => {

@@ -5,17 +5,30 @@ export class TenantConfigService {
   private readonly configUrl: string;
 
   constructor() {
-    // 올바른 control plane URL 사용
-    const controlPlaneUrl = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL || 'https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/';
-    this.configUrl = `${controlPlaneUrl}tenant-config`;
+    // 개발 환경에서는 Next.js API 프록시 사용, 프로덕션에서는 직접 호출
+    if (process.env.NODE_ENV === 'development') {
+      this.configUrl = '/api/tenant-config';
+    } else {
+      const controlPlaneUrl = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL || 'https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/';
+      this.configUrl = `${controlPlaneUrl}tenant-config`;
+    }
   }
 
-  // 테스트용 샘플 ConfigParams
+  // 테스트용 샘플 ConfigParams - 개발 환경에서만 사용
   private getSampleConfigParams(tenantId: string): ConfigParams {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const domain = process.env.NEXT_PUBLIC_DOMAIN || 'localhost:3000';
+    
     return {
-      authServer: `https://cognito-idp.us-west-2.amazonaws.com/${tenantId}`,
-      appClientId: 'sample-client-id',
-      redirectUrl: 'http://localhost:3000/auth/callback'
+      authServer: isProduction 
+        ? `https://${tenantId}.auth.ap-northeast-2.amazoncognito.com`
+        : `https://cognito-idp.us-west-2.amazonaws.com/${tenantId}`,
+      appClientId: isProduction 
+        ? `${tenantId}-client-id`
+        : 'sample-client-id',
+      redirectUrl: isProduction 
+        ? `https://${domain}/auth/callback`
+        : 'http://localhost:3000/auth/callback'
     };
   }
 
@@ -45,7 +58,9 @@ export class TenantConfigService {
     try {
       const url = `${this.configUrl}?tenantId=${tenantId}`;
       
-      console.log('Fetching config params from:', url);
+      console.log('🌐 API Request URL:', url);
+      console.log('🌐 Environment:', process.env.NODE_ENV);
+      console.log('🌐 Control Plane URL:', this.configUrl);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -54,27 +69,31 @@ export class TenantConfigService {
         },
       });
 
-      console.log('Response status:', response.status);
+      console.log('🌐 API Response status:', response.status);
+      console.log('🌐 API Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API Error Response:', errorText);
+        console.error('🌐 API Error Response:', errorText);
         
-        // API 오류 시 테스트용 샘플 데이터 반환
-        console.log('Using sample config params for testing');
-        return this.getSampleConfigParams(tenantId);
+        // 실제 오류를 던져서 사용자가 문제를 알 수 있도록 함
+        throw new Error(`API 오류 (${response.status}): ${errorText || response.statusText}`);
       }
 
       const data: ConfigParams = await response.json();
-      console.log('Config params response:', data);
+      console.log('🌐 API Success - Config params response:', data);
       
       return data;
     } catch (error) {
-      console.error('Error fetching config params:', error);
+      console.error('🌐 Network/API Error:', error);
       
-      // 네트워크 오류 시 테스트용 샘플 데이터 반환
-      console.log('Using sample config params due to network error');
-      return this.getSampleConfigParams(tenantId);
+      // 네트워크 오류의 경우 더 구체적인 오류 메시지
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`네트워크 연결 오류: Control Plane API(${this.configUrl})에 접근할 수 없습니다.`);
+      }
+      
+      // 다른 오류는 그대로 재던짐
+      throw error;
     }
   }
 
