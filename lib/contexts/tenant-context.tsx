@@ -88,12 +88,12 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       const savedTenantId = localStorage.getItem('currentTenantId') || sessionStorage.getItem('tenantId');
       console.log('TenantContext init:', { savedTenantId, currentTenantId: tenantId });
-      if (savedTenantId && !tenantId) {
+      if (savedTenantId && !tenantId && !loading) {
         console.log('Restoring tenant ID from storage:', savedTenantId);
         setTenantId(savedTenantId);
       }
     }
-  }, [setTenantId, tenantId]);
+  }, []); // 빈 의존성 배열로 변경하여 초기 한번만 실행
 
   const value: TenantContextType = {
     tenantId,

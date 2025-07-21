@@ -13,11 +13,18 @@ export default function HomePage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tenantIdFromUrl = urlParams.get('tenantId');
+    const savedTenantId = localStorage.getItem('currentTenantId');
+    
     if (tenantIdFromUrl) {
       localStorage.setItem('currentTenantId', tenantIdFromUrl);
+      return;
     }
-    if (!tenantIdFromUrl && !localStorage.getItem('currentTenantId')) {
+    
+    // tenantId가 URL에도 없고 localStorage에도 없으면 즉시 리다이렉트
+    if (!tenantIdFromUrl && !savedTenantId) {
+      console.log('No tenantId found, redirecting to select-tenant');
       window.location.replace('/select-tenant');
+      return;
     }
   }, []);
 

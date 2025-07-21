@@ -1,0 +1,43 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci --cache .npm --prefer-offline
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - .next/cache/**/*
+      - .npm/**/*
+  customHeaders:
+    - pattern: '**/*'
+      headers:
+        - key: 'Strict-Transport-Security'
+          value: 'max-age=31536000; includeSubDomains'
+        - key: 'X-Frame-Options'
+          value: 'SAMEORIGIN'
+        - key: 'X-XSS-Protection'
+          value: '1; mode=block'
+        - key: 'X-Content-Type-Options'
+          value: 'nosniff'
+        - key: 'Referrer-Policy'
+          value: 'strict-origin-when-cross-origin'
+  environmentVariables:
+    - name: NEXT_PUBLIC_API_URL
+      value: "https://023johxt48.execute-api.ap-northeast-2.amazonaws.com/prod/"
+    - name: NEXT_PUBLIC_CONTROL_PLANE_URL
+      value: "https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/"
+    - name: NEXT_PUBLIC_DOMAIN
+      value: "main.d5ub1n0zyzcoi.amplifyapp.com"
+    - name: NEXT_PUBLIC_USING_CUSTOM_DOMAIN
+      value: "false"
+    - name: NEXT_PUBLIC_APP_NAME
+      value: "SaaS Application Portal"
+    - name: NEXT_PUBLIC_APP_VERSION
+      value: "1.0.0" 
