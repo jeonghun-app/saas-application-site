@@ -3,26 +3,18 @@ export interface Product {
   name: string;
   price: number;
   pictureUrl?: string;
-  description?: string;
-  category?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface CreateProductRequest {
   name: string;
   price: number;
   pictureUrl?: string;
-  description?: string;
-  category?: string;
 }
 
 export interface UpdateProductRequest {
   name?: string;
   price?: number;
   pictureUrl?: string;
-  description?: string;
-  category?: string;
 }
 
 export interface ProductStats {

@@ -1,35 +1,23 @@
 export interface OrderProduct {
   productId: string;
-  productName: string;
   price: number;
   quantity: number;
 }
 
 export interface Order {
-  orderId: string;
+  id: string;
   name: string;
-  orderProducts: OrderProduct[];
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  updatedAt?: string;
+  orderProduct: OrderProduct[];
 }
 
 export interface CreateOrderRequest {
   name: string;
-  orderProducts: {
-    productId: string;
-    quantity: number;
-  }[];
+  orderProduct: OrderProduct[];
 }
 
 export interface UpdateOrderRequest {
   name?: string;
-  status?: string;
-  orderProducts?: {
-    productId: string;
-    quantity: number;
-  }[];
+  orderProduct?: OrderProduct[];
 }
 
 export interface OrderStats {

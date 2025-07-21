@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useTenant } from '@/lib/contexts/tenant-context';
+import { serviceHelper } from '@/lib/services/service-helper';
 import { 
   LayoutDashboard, 
   Package, 
@@ -34,13 +33,28 @@ const quickActions = [
 export function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const pathname = usePathname();
+  const [currentPath, setCurrentPath] = useState('/dashboard');
   const { tenantId } = useTenant();
 
   // Load collapsed state from localStorage
   useEffect(() => {
     const savedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     setCollapsed(savedCollapsed);
+  }, []);
+
+  // 해시 변경 감지
+  useEffect(() => {
+    const updateCurrentPath = () => {
+      const path = serviceHelper.getCurrentPath();
+      setCurrentPath(`/${path}`);
+    };
+
+    // 초기 경로 설정
+    updateCurrentPath();
+
+    // 해시 변경 이벤트 리스너
+    window.addEventListener('hashchange', updateCurrentPath);
+    return () => window.removeEventListener('hashchange', updateCurrentPath);
   }, []);
 
   // Save collapsed state to localStorage and notify other components
@@ -53,15 +67,20 @@ export function Sidebar() {
     window.dispatchEvent(new CustomEvent('sidebarToggle', { detail: newCollapsed }));
   };
 
-  const NavItem = ({ item, isQuickAction = false }: { item: any, isQuickAction?: boolean }) => {
-    const isActive = pathname === item.href;
+  const NavItem = ({ item, isQuickAction = false }: { item: { name: string; href: string; icon: React.ElementType }, isQuickAction?: boolean }) => {
+    const isActive = currentPath === item.href;
     const Icon = item.icon;
 
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      serviceHelper.navigateTo(item.href);
+    };
+
     return (
-      <Link
-        href={item.href}
+      <button
+        onClick={handleClick}
         className={cn(
-          'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
+          'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 w-full text-left',
           isActive
             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
             : 'text-slate-600 hover:bg-white/50 hover:text-slate-900',
@@ -77,7 +96,7 @@ export function Sidebar() {
         {!collapsed && (
           <span className="truncate">{item.name}</span>
         )}
-      </Link>
+      </button>
     );
   };
 
@@ -111,7 +130,8 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside className={cn(
-        'fixed inset-y-0 left-0 z-50 flex flex-col',
+        // 'fixed inset-y-0 left-0 z-50 flex flex-col', // 기존
+        'h-screen flex flex-col', // static, flex row의 첫 번째 자식
         'bg-white/80 backdrop-blur-xl border-r border-slate-200/50',
         'transition-all duration-300 shadow-xl',
         collapsed ? 'w-20' : 'w-80',
@@ -183,7 +203,10 @@ export function Sidebar() {
           {!collapsed && (
             <div className="text-center">
               <p className="text-xs text-slate-500">
-                SaaS Application v1.0
+                AWS SaaS Factory Pattern
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Hash-based Routing
               </p>
             </div>
           )}

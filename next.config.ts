@@ -1,7 +1,16 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // 해시 기반 라우팅 지원
+  trailingSlash: false,
+
+  // 환경 변수 설정 (올바른 값)
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://023johxt48.execute-api.ap-northeast-2.amazonaws.com/prod/',
+    NEXT_PUBLIC_CONTROL_PLANE_URL: process.env.NEXT_PUBLIC_CONTROL_PLANE_URL || 'https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/',
+    NEXT_PUBLIC_DOMAIN: process.env.NEXT_PUBLIC_DOMAIN || 'd3ojgekkmk5kpk.cloudfront.net',
+    NEXT_PUBLIC_USING_CUSTOM_DOMAIN: process.env.NEXT_PUBLIC_USING_CUSTOM_DOMAIN || 'false',
+  },
 };
 
 export default nextConfig;
