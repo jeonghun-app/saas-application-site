@@ -30,7 +30,7 @@ export default function LoginButton({ children = 'Login', className }: LoginButt
       loginUrl.searchParams.set('scope', authConfig.scope);
       loginUrl.searchParams.set('state', btoa(JSON.stringify({
         tenantId: tenantConfig.TENANT_ID,
-        returnUrl: window.location.hash || '/dashboard'
+        returnUrl: window.location.hash || `/${tenantConfig.TENANT_ID}/dashboard`
       })));
 
       // 로그인 페이지로 리다이렉트

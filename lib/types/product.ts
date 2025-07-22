@@ -1,20 +1,54 @@
 export interface Product {
-  productId: string;
+  id: string; // tenantId#productName 형식
   name: string;
-  price: number;
-  pictureUrl?: string;
+  description: string;
+  currency: string;
+  interestRate: number;
+  tenantId: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateProductRequest {
   name: string;
-  price: number;
-  pictureUrl?: string;
+  description: string;
+  currency: string;
+  interestRate: number;
 }
 
 export interface UpdateProductRequest {
   name?: string;
-  price?: number;
-  pictureUrl?: string;
+  description?: string;
+  currency?: string;
+  interestRate?: number;
+}
+
+// DynamoDB 형식
+export interface DynamoDBProduct {
+  id: {
+    S: string;
+  };
+  currency: {
+    S: string;
+  };
+  description: {
+    S: string;
+  };
+  interestRate: {
+    N: string;
+  };
+  name: {
+    S: string;
+  };
+  tenantId?: {
+    S: string;
+  };
+  createdAt?: {
+    S: string;
+  };
+  updatedAt?: {
+    S: string;
+  };
 }
 
 export interface ProductStats {

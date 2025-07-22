@@ -110,7 +110,12 @@ export default function HomePage() {
       // URL 정리 후 대시보드로 이동
       window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        const savedTenantId = localStorage.getItem('currentTenantId');
+        if (savedTenantId) {
+          window.location.href = `/${savedTenantId}/dashboard`;
+        } else {
+          window.location.href = '/select-tenant';
+        }
       }, 1000);
     }
   }, [isProcessingCallback, auth.isAuthenticated, auth.user]);
@@ -158,7 +163,12 @@ export default function HomePage() {
     const code = urlParams.get('code');
     if (code) return;
     if (auth.isAuthenticated && auth.user && window.location.pathname === '/') {
-      window.location.replace('/dashboard');
+      const savedTenantId = localStorage.getItem('currentTenantId');
+      if (savedTenantId) {
+        window.location.replace(`/${savedTenantId}/dashboard`);
+      } else {
+        window.location.replace('/select-tenant');
+      }
       return;
     }
     if (!tenantId && !auth.isLoading && !showWelcome) {

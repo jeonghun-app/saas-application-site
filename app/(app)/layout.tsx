@@ -28,22 +28,7 @@ export default function AppLayout({
     }
   }, [auth.isLoading, auth.isAuthenticated]);
 
-  // 해시 변경 감지 및 라우팅 처리
-  useEffect(() => {
-    const handleHashChange = () => {
-      const currentPath = serviceHelper.getCurrentPath();
-      const currentTenantId = serviceHelper.getTenantId();
-      
-      // 테넌트 ID가 변경된 경우 처리
-      if (currentTenantId && currentTenantId !== tenantId) {
-        // 새로운 테넌트로 이동
-        window.location.href = `/#/${currentTenantId}/${currentPath}`;
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [tenantId]);
+  // 해시 기반 라우팅 제거 - Next.js 파일 시스템 라우팅 사용
 
   // 인증 또는 초기화 중 로딩 화면
   if (auth.isLoading || isLoading) {

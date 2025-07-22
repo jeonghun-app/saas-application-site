@@ -1,17 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
+import { ShoppingCart, DollarSign, Package, TrendingUp } from 'lucide-react';
 import { useTenant } from '@/lib/contexts/tenant-context';
-import { orderService } from '@/lib/services/order-service';
+import { useAuth } from 'react-oidc-context';
 import { serviceHelper } from '@/lib/services/service-helper';
 import { authInterceptor } from '@/lib/services/auth-interceptor';
+import { orderService } from '@/lib/services/order-service';
+import { Order, OrderProduct } from '@/lib/types/order';
 import { getCompanyName, getTenantPlan } from '@/lib/auth-config';
 import LogoutButton from '@/components/auth/logout-button';
 import { 
-  Package, 
-  ShoppingCart, 
-  DollarSign,
-  TrendingUp,
+  Package as PackageIcon, 
+  ShoppingCart as ShoppingCartIcon, 
+  DollarSign as DollarSignIcon,
+  TrendingUp as TrendingUpIcon,
   Activity,
   ArrowUpRight,
   Loader2,
@@ -20,10 +23,7 @@ import {
   Shield,
   Mail
 } from 'lucide-react';
-import { useAuth } from 'react-oidc-context';
 
-interface OrderProduct { price: number; quantity: number; }
-interface Order { id: string; customerName?: string; orderProduct: OrderProduct[]; }
 interface DashboardStats {
   totalProducts: number;
   totalOrders: number;
@@ -31,9 +31,17 @@ interface DashboardStats {
   pendingOrders: number;
 }
 
-export default function DashboardPage() {
-  const { tenantId, tenantConfig, loading: tenantLoading, error: tenantError } = useTenant();
+interface DashboardPageProps {
+  params: Promise<{
+    tenantId: string;
+  }>;
+}
+
+export default function DashboardPage({ params }: DashboardPageProps) {
+  const { tenantId: contextTenantId, tenantConfig, loading: tenantLoading, error: tenantError } = useTenant();
   const auth = useAuth();
+  const { tenantId } = use(params); // Promise를 unwrap
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     totalOrders: 0,
@@ -43,6 +51,13 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // URL의 tenantId를 컨텍스트에 설정
+    if (tenantId && tenantId !== contextTenantId) {
+      serviceHelper.setTenantId(tenantId);
+    }
+  }, [tenantId, contextTenantId]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -92,7 +107,7 @@ export default function DashboardPage() {
       value: loading ? '...' : stats.totalOrders.toString(),
       change: '+8%',
       changeType: 'positive',
-      icon: ShoppingCart,
+      icon: ShoppingCartIcon,
       color: 'from-green-500 to-green-600',
       href: '/orders'
     },
@@ -101,7 +116,7 @@ export default function DashboardPage() {
       value: loading ? '...' : `$${stats.totalRevenue.toLocaleString()}`,
       change: '+15%',
       changeType: 'positive',
-      icon: DollarSign,
+      icon: DollarSignIcon,
       color: 'from-purple-500 to-purple-600',
       href: '/orders'
     },
@@ -182,7 +197,7 @@ export default function DashboardPage() {
             </LogoutButton>
           ) : null}
           <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200">
-            <TrendingUp className="h-5 w-5 mr-2 inline" />
+            <TrendingUpIcon className="h-5 w-5 mr-2 inline" />
             View Analytics
           </button>
         </div>
@@ -240,14 +255,14 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div 
           className="border-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg transition-all duration-300 cursor-pointer rounded-2xl p-6"
-          onClick={() => serviceHelper.navigateTo('/products/create')}
+                      onClick={() => window.location.href = `/${tenantId}/products/create`}
         >
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold">Add Product</h3>
               <p className="text-blue-100 text-sm mt-1">Create a new product listing</p>
             </div>
-            <Package className="h-8 w-8 text-blue-200" />
+            <PackageIcon className="h-8 w-8 text-blue-200" />
           </div>
         </div>
 
@@ -260,7 +275,7 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold">New Order</h3>
               <p className="text-green-100 text-sm mt-1">Create a new customer order</p>
             </div>
-            <ShoppingCart className="h-8 w-8 text-green-200" />
+            <ShoppingCartIcon className="h-8 w-8 text-green-200" />
           </div>
         </div>
 
@@ -273,7 +288,7 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold">View Reports</h3>
               <p className="text-purple-100 text-sm mt-1">Analyze business metrics</p>
             </div>
-            <TrendingUp className="h-8 w-8 text-purple-200" />
+            <TrendingUpIcon className="h-8 w-8 text-purple-200" />
           </div>
         </div>
       </div>
@@ -285,7 +300,7 @@ export default function DashboardPage() {
             {orders.slice(0, 3).map(order => (
               <li key={order.id} className="p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                 <span className="font-mono text-slate-700">#{order.id}</span>
-                <span className="text-slate-600">{order.customerName || 'Customer'}</span>
+                <span className="text-slate-600">Customer Order</span>
                 <span className="text-slate-900 font-bold">${order.orderProduct?.reduce((sum: number, item: OrderProduct) => sum + (item.price * item.quantity), 0).toLocaleString()}</span>
               </li>
             ))}

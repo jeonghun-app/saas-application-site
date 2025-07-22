@@ -76,14 +76,14 @@ export class ServiceHelper {
     }
   }
 
-  // AWS SaaS Factory 패턴: 해시 기반 네비게이션
+  // Next.js 파일 시스템 기반 라우팅
   navigateTo(path: string): void {
     if (typeof window !== 'undefined') {
       const tenantId = this.getTenantId();
       if (tenantId) {
-        window.location.hash = `/${tenantId}${path}`;
+        window.location.href = `/${tenantId}${path}`;
       } else {
-        window.location.hash = path;
+        window.location.href = '/select-tenant';
       }
     }
   }

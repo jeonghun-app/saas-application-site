@@ -21,7 +21,12 @@ export default function AuthCallbackPage() {
     if (auth.isAuthenticated && auth.user) {
       console.log('🔐 Authentication successful, redirecting to dashboard');
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        const savedTenantId = localStorage.getItem('currentTenantId');
+        if (savedTenantId) {
+          window.location.href = `/${savedTenantId}/dashboard`;
+        } else {
+          window.location.href = '/select-tenant';
+        }
       }, 1000);
     }
   }, [auth.isAuthenticated, auth.user]);

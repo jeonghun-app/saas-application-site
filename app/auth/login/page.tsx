@@ -49,7 +49,12 @@ export default function LoginPage() {
       
       // 대시보드로 리다이렉트 - 페이지 새로고침 없이 router 사용
       if (typeof window !== 'undefined') {
-        window.location.href = '/dashboard';
+        const savedTenantId = localStorage.getItem('currentTenantId');
+        if (savedTenantId) {
+          window.location.href = `/${savedTenantId}/dashboard`;
+        } else {
+          window.location.href = '/select-tenant';
+        }
       }
     }
   }, [auth.isAuthenticated, auth.user]);
@@ -140,7 +145,14 @@ export default function LoginPage() {
               {/* 액션 버튼들 */}
               <div className="space-y-3">
                 <button
-                  onClick={() => window.location.href = '/dashboard'}
+                  onClick={() => {
+                const savedTenantId = localStorage.getItem('currentTenantId');
+                if (savedTenantId) {
+                  window.location.href = `/${savedTenantId}/dashboard`;
+                } else {
+                  window.location.href = '/select-tenant';
+                }
+              }}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200"
                 >
                   대시보드로 이동

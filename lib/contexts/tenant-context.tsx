@@ -16,7 +16,12 @@ interface TenantContextType {
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
 export function TenantProvider({ children }: { children: ReactNode }) {
-  const [tenantId, setTenantIdState] = useState<string | null>(null);
+  const [tenantId, setTenantIdState] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('currentTenantId');
+    }
+    return null;
+  });
   const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,14 +34,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     console.log('🏠 MOUNTED!');
     setMounted(true);
     
-    // localStorage에서 직접 읽기
-    const saved = localStorage.getItem('currentTenantId');
-    console.log('🏠 Direct localStorage read:', saved);
-    
-    if (saved) {
-      console.log('🏠 Setting saved tenantId:', saved);
-      setTenantIdState(saved);
-    }
+    // localStorage에서 직접 읽기 (초기값에서 이미 처리하므로 생략)
   }, []);
 
   // tenantId가 설정되면 자동으로 설정 로드
