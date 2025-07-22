@@ -37,11 +37,23 @@ export default function HomePage() {
       localStorage.setItem('currentTenantId', tenantIdFromUrl);
       console.log('🏠 TenantId saved from URL:', tenantIdFromUrl);
       
-      // 해시에서 테넌트 ID를 추출했으면 테넌트 선택 페이지로 리다이렉트
-      console.log('🏠 Redirecting to tenant selection with pre-filled tenantId...');
-      setTimeout(() => {
-        window.location.href = '/select-tenant';
-      }, 100);
+      // OAuth 콜백 처리 중인지 확인 (code, error 파라미터 존재)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isOAuthCallback = urlParams.get('code') || urlParams.get('error') || urlParams.get('path');
+      
+      if (isOAuthCallback) {
+        console.log('🔐 OAuth callback detected, not redirecting to tenant selection');
+        return; // OAuth 콜백 처리를 위해 현재 페이지에 머물기
+      }
+      
+      // 새로운 방문자만 테넌트 선택 페이지로 리다이렉트
+      // (인증된 사용자는 나중에 대시보드로 리다이렉트됨)
+      if (!auth.isAuthenticated && !auth.isLoading) {
+        console.log('🏠 New visitor with tenantId, redirecting to tenant selection...');
+        setTimeout(() => {
+          window.location.href = '/select-tenant';
+        }, 100);
+      }
       return;
     }
     
