@@ -1,135 +1,81 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
-import { serviceHelper } from '@/lib/services/service-helper';
-import { authInterceptor } from '@/lib/services/auth-interceptor';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function AuthCallbackPage() {
-  const { tenantId, tenantConfig } = useTenant();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const auth = useAuth();
+  const { tenantConfig } = useTenant();
 
+  console.log('🔐 AuthCallback render:', { 
+    authLoading: auth.isLoading,
+    authError: auth.error,
+    isAuthenticated: auth.isAuthenticated,
+    user: !!auth.user
+  });
+
+  // 인증 성공 시 대시보드로 리다이렉트
   useEffect(() => {
-    handleAuthCallback();
-  }, []);
-
-  const handleAuthCallback = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // URL 파라미터에서 인증 코드 추출
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const state = urlParams.get('state');
-      const error = urlParams.get('error');
-
-      console.log('Auth callback received:', { code, state, error });
-
-      if (error) {
-        throw new Error(`Cognito error: ${error}`);
-      }
-
-      if (!code) {
-        throw new Error('인증 코드가 없습니다.');
-      }
-
-      if (!tenantId || !tenantConfig) {
-        throw new Error('테넌트 정보가 없습니다.');
-      }
-
-      // state에서 테넌트 ID와 리턴 URL 추출
-      let returnUrl = '/dashboard';
-      if (state) {
-        try {
-          const stateData = JSON.parse(atob(state));
-          if (stateData.tenantId && stateData.tenantId === tenantId) {
-            returnUrl = stateData.returnUrl || '/dashboard';
-          }
-        } catch (e) {
-          console.warn('Failed to parse state:', e);
-        }
-      }
-
-      // TODO: 실제 토큰 교환 로직 구현
-      // 현재는 시뮬레이션
-      console.log('Exchanging code for tokens...');
-      
-      // 시뮬레이션: 토큰 저장
-      const mockTokens = {
-        access_token: 'mock-access-token',
-        id_token: 'mock-id-token',
-        refresh_token: 'mock-refresh-token'
-      };
-      
-      authInterceptor.setToken(mockTokens.access_token);
-      
-      setSuccess(true);
-      
-      // 잠시 후 대시보드로 이동
+    if (auth.isAuthenticated && auth.user) {
+      console.log('🔐 Authentication successful, redirecting to dashboard');
       setTimeout(() => {
-        // 해시 기반 라우팅으로 대시보드 이동
-        window.location.hash = `/${tenantId}${returnUrl}`;
-        window.location.reload();
-      }, 2000);
-
-    } catch (err) {
-      console.error('Auth callback error:', err);
-      setError(err instanceof Error ? err.message : '인증 처리 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
+        window.location.href = '/dashboard';
+      }, 1000);
     }
-  };
+  }, [auth.isAuthenticated, auth.user]);
 
-  const handleRetry = () => {
-    window.location.href = '/auth/login';
-  };
+  // 인증 오류 시 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (auth.error && !auth.isLoading) {
+      console.error('🔐 Auth error, redirecting to login:', auth.error);
+      setTimeout(() => {
+        window.location.href = '/auth/login?error=' + encodeURIComponent(auth.error?.message || 'Unknown error');
+      }, 3000);
+    }
+  }, [auth.error, auth.isLoading]);
 
-  const handleBackToTenantSelection = () => {
-    serviceHelper.clearTenantId();
-    window.location.href = '/select-tenant';
-  };
-
-  if (loading) {
+  // 로딩 중인 경우
+  if (auth.isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">인증 처리 중</h2>
-          <p className="text-slate-600">Cognito에서 인증을 확인하고 있습니다...</p>
+          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+            <Loader2 className="h-8 w-8 text-white animate-spin" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            인증 처리 중
+          </h2>
+          <p className="text-slate-600">
+            Cognito 인증을 처리하고 있습니다...
+          </p>
+          {tenantConfig && (
+            <p className="text-sm text-slate-500 mt-2">
+              테넌트: {tenantConfig.COMPANY_NAME}
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
-  if (error) {
+  // 인증 오류가 있는 경우
+  if (auth.error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="shadow-xl border-0 bg-white/80 backdrop-blur-sm rounded-2xl p-8">
             <div className="text-center">
-              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-6" />
+              <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertCircle className="h-8 w-8 text-red-500" />
+              </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">인증 오류</h2>
-              <p className="text-slate-600 mb-6">{error}</p>
+              <p className="text-slate-600 mb-6">{auth.error?.message || 'Unknown error occurred'}</p>
               
-              <div className="space-y-3">
-                <button
-                  onClick={handleRetry}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200"
-                >
-                  다시 로그인
-                </button>
-                
-                <button
-                  onClick={handleBackToTenantSelection}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-4 rounded-xl transition-all duration-200"
-                >
-                  다른 테넌트 선택
-                </button>
+              <div className="flex items-center justify-center space-x-2 text-blue-600 mb-4">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">로그인 페이지로 이동 중...</span>
               </div>
             </div>
           </div>
@@ -138,18 +84,25 @@ export default function AuthCallbackPage() {
     );
   }
 
-  if (success) {
+  // 인증 성공한 경우
+  if (auth.isAuthenticated && auth.user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="shadow-xl border-0 bg-white/80 backdrop-blur-sm rounded-2xl p-8">
             <div className="text-center">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="h-8 w-8 text-green-500" />
+              </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">로그인 성공!</h2>
-              <p className="text-slate-600 mb-6">
-                테넌트: {tenantConfig?.COMPANY_NAME}<br />
-                잠시 후 대시보드로 이동합니다...
+              <p className="text-slate-600 mb-2">
+                환영합니다, {auth.user.profile?.email}!
               </p>
+              {tenantConfig && (
+                <p className="text-slate-600 mb-6">
+                  테넌트: {tenantConfig.COMPANY_NAME}
+                </p>
+              )}
               
               <div className="flex items-center justify-center space-x-2 text-blue-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -162,5 +115,20 @@ export default function AuthCallbackPage() {
     );
   }
 
-  return null;
+  // 기본 로딩 상태
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="text-center">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+          <Loader2 className="h-8 w-8 text-white animate-spin" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          인증 확인 중
+        </h2>
+        <p className="text-slate-600">
+          잠시만 기다려주세요...
+        </p>
+      </div>
+    </div>
+  );
 } 

@@ -17,7 +17,12 @@ export class TenantConfigService {
   // 테스트용 샘플 ConfigParams - 개발 환경에서만 사용
   private getSampleConfigParams(tenantId: string): ConfigParams {
     const isProduction = process.env.NODE_ENV === 'production';
-    const domain = process.env.NEXT_PUBLIC_DOMAIN || 'localhost:3000';
+    const domain = process.env.NEXT_PUBLIC_DOMAIN || 
+      (typeof window !== 'undefined' ? window.location.host : 'localhost:3000');
+    
+    // 현재 환경의 프로토콜 감지
+    const protocol = typeof window !== 'undefined' ? window.location.protocol : 
+      (isProduction ? 'https:' : 'http:');
     
     return {
       authServer: isProduction 
@@ -26,9 +31,7 @@ export class TenantConfigService {
       appClientId: isProduction 
         ? `${tenantId}-client-id`
         : 'sample-client-id',
-      redirectUrl: isProduction 
-        ? `https://${domain}/auth/callback`
-        : 'http://localhost:3000/auth/callback'
+      redirectUrl: `${protocol}//${domain}/auth/callback`
     };
   }
 

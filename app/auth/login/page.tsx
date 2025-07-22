@@ -10,6 +10,17 @@ export default function LoginPage() {
   const { tenantId, tenantConfig } = useTenant();
   const [error, setError] = useState<string | null>(null);
 
+  // URL에서 에러 파라미터 확인
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      // URL에서 에러 파라미터 제거
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   console.log('🔐 LoginPage render:', { 
     authLoading: auth.isLoading,
     authError: auth.error,
@@ -36,8 +47,10 @@ export default function LoginPage() {
         sub: auth.user.profile?.sub
       });
       
-      // 대시보드로 리다이렉트
-      window.location.href = '/dashboard';
+      // 대시보드로 리다이렉트 - 페이지 새로고침 없이 router 사용
+      if (typeof window !== 'undefined') {
+        window.location.href = '/dashboard';
+      }
     }
   }, [auth.isAuthenticated, auth.user]);
 
@@ -193,17 +206,24 @@ export default function LoginPage() {
             )}
             {/* Login Button */}
             <button
-              onClick={() => {
-                if (!tenantConfig) return;
-                const cognitoDomain = `https://${tenantConfig.AUTH_CLIENT_ID}.auth.ap-northeast-2.amazoncognito.com`;
-                const loginUrl = `${cognitoDomain}/login?client_id=${tenantConfig.AUTH_CLIENT_ID}&response_type=code&scope=email+openid+phone+profile&redirect_uri=${encodeURIComponent(tenantConfig.AUTH_REDIRECT_URI)}`;
-                window.location.href = loginUrl;
+              onClick={async () => {
+                try {
+                  console.log('🔐 Starting signin redirect...');
+                  await auth.signinRedirect();
+                } catch (error) {
+                  console.error('🔐 Signin redirect failed:', error);
+                  setError('로그인 요청 중 오류가 발생했습니다.');
+                }
               }}
-              disabled={!tenantConfig}
+              disabled={!tenantConfig || auth.isLoading}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <Shield className="h-4 w-4" />
-              <span>Cognito로 로그인</span>
+              {auth.isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Shield className="h-4 w-4 mr-2" />
+              )}
+              <span>{auth.isLoading ? '로그인 중...' : 'Cognito로 로그인'}</span>
             </button>
             {/* Back Button */}
             <button

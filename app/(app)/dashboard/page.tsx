@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTenant } from '@/lib/contexts/tenant-context';
-import { productService } from '@/lib/services/product-service';
 import { orderService } from '@/lib/services/order-service';
 import { serviceHelper } from '@/lib/services/service-helper';
 import { authInterceptor } from '@/lib/services/auth-interceptor';

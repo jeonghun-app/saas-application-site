@@ -20,7 +20,6 @@ function createCognitoAuthConfig(configParams: ConfigParams, tenantId: string) {
     const matches = configParams.authServer.match(/https:\/\/cognito-idp\.([^.]+)\.amazonaws\.com\/(.+)/);
     if (matches) {
       const region = matches[1];
-      const poolId = matches[2];
       // 기본 Cognito 도메인 형식으로 변환 (실제 환경에서는 사용자 풀 도메인을 사용해야 함)
       cognitoDomain = `https://${configParams.appClientId}.auth.${region}.amazoncognito.com`;
     }
@@ -140,15 +139,15 @@ export function MultiTenantAuthProvider({ children }: MultiTenantAuthProviderPro
     );
   }
 
-  // OIDC 설정 생성
+  // OIDC 설정 생성 - Cognito 설정에 맞춰 tenantId 포함
   const configParams: ConfigParams = {
     authServer: tenantConfig.AUTH_SERVER,
     appClientId: tenantConfig.AUTH_CLIENT_ID,
-    redirectUrl: tenantConfig.AUTH_REDIRECT_URI
+    redirectUrl: `${window.location.origin}/?tenantId=${tenantId}`
   };
 
   const cognitoAuthConfig = createCognitoAuthConfig(configParams, tenantId);
-  console.log('🔐 Creating AuthProvider with config:', cognitoAuthConfig);
+  console.log('🔐 Creating AuthProvider with config (using simple logout):', cognitoAuthConfig);
 
   return (
     <AuthProvider {...cognitoAuthConfig}>

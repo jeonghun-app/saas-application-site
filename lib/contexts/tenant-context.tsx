@@ -47,6 +47,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       console.log('🏠 Auto-loading config for restored tenant:', tenantId);
       setTenantId(tenantId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenantId, tenantConfig, loading, mounted]);
 
   // 테넌트 ID 설정 함수

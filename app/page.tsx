@@ -9,6 +9,7 @@ export default function HomePage() {
   const auth = useAuth();
   const { tenantId } = useTenant();
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isProcessingCallback, setIsProcessingCallback] = useState(false);
 
   // 최초 진입 시 tenantId 체크 및 세팅
   useEffect(() => {
@@ -29,12 +30,65 @@ export default function HomePage() {
     }
   }, []);
 
+  // 콜백 처리 감지 및 상태 설정 (OAuth 및 logout 처리)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('code')) {
-      window.history.replaceState({}, document.title, window.location.pathname);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    const path = urlParams.get('path');
+    
+    // 로그아웃 처리
+    if (path === 'logoff') {
+      console.log('🔐 Logout path detected, cleaning up and redirecting...');
+      
+      // 모든 인증 정보 정리
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+        // URL에서 파라미터 제거하고 테넌트 선택 페이지로 이동
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => {
+          window.location.href = '/select-tenant';
+        }, 500);
+      }
+      return;
     }
-  }, [auth.isAuthenticated]);
+    
+    if (code || error) {
+      console.log('🔐 OAuth callback detected:', { code: !!code, error });
+      setIsProcessingCallback(true);
+      
+      if (error) {
+        console.error('🔐 OAuth error received:', error);
+        setTimeout(() => {
+          window.location.href = '/auth/login?error=' + encodeURIComponent(error);
+        }, 2000);
+        return;
+      }
+    }
+  }, []);
+
+  // 인증 완료 후 대시보드로 리다이렉트
+  useEffect(() => {
+    if (isProcessingCallback && auth.isAuthenticated && auth.user) {
+      console.log('🔐 Authentication completed via callback, redirecting to dashboard');
+      // URL 정리 후 대시보드로 이동
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+    }
+  }, [isProcessingCallback, auth.isAuthenticated, auth.user]);
+
+  // 인증 오류 처리
+  useEffect(() => {
+    if (isProcessingCallback && auth.error) {
+      console.error('🔐 Authentication error during callback:', auth.error);
+      setTimeout(() => {
+        window.location.href = '/auth/login?error=' + encodeURIComponent(auth.error?.message || 'Authentication failed');
+      }, 2000);
+    }
+  }, [isProcessingCallback, auth.error]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -53,6 +107,30 @@ export default function HomePage() {
       return;
     }
   }, [auth.isAuthenticated, auth.user, auth.isLoading, tenantId, showWelcome]);
+
+  // 콜백 처리 중 로딩 화면
+  if (isProcessingCallback) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+            <Loader2 className="h-8 w-8 text-white animate-spin" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            로그인 처리 중
+          </h2>
+          <p className="text-slate-600 mb-4">
+            Cognito 인증을 완료하고 있습니다...
+          </p>
+          {auth.error && (
+            <p className="text-red-600 text-sm">
+              오류가 발생했습니다. 잠시 후 로그인 페이지로 이동합니다.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // 웰컴 화면 표시
   if (showWelcome) {

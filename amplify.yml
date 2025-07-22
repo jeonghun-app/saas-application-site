@@ -29,15 +29,24 @@ frontend:
         - key: 'Referrer-Policy'
           value: 'strict-origin-when-cross-origin'
   environmentVariables:
+    # API Gateway URLs - 실제 배포 시 업데이트 필요
     - name: NEXT_PUBLIC_API_URL
       value: "https://023johxt48.execute-api.ap-northeast-2.amazonaws.com/prod/"
     - name: NEXT_PUBLIC_CONTROL_PLANE_URL
       value: "https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/"
+    
+    # Domain 설정 - Amplify 앱 URL로 자동 설정됨
     - name: NEXT_PUBLIC_DOMAIN
       value: "main.d5ub1n0zyzcoi.amplifyapp.com"
     - name: NEXT_PUBLIC_USING_CUSTOM_DOMAIN
       value: "false"
+    
+    # 앱 메타데이터
     - name: NEXT_PUBLIC_APP_NAME
       value: "SaaS Application Portal"
     - name: NEXT_PUBLIC_APP_VERSION
-      value: "1.0.0" 
+      value: "1.0.0"
+    
+    # Node.js 환경 설정
+    - name: NODE_ENV
+      value: "production" 
