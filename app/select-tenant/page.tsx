@@ -21,46 +21,78 @@ export default function SelectTenantPage() {
 
   // 페이지 로드 시 URL 해시나 localStorage에서 테넌트 ID 자동 입력
   useEffect(() => {
-    console.log('🏠 SelectTenant: Checking for pre-filled tenantId...', {
-      hash: window.location.hash,
-      search: window.location.search,
-      localStorage: localStorage.getItem('currentTenantId')
-    });
+    const extractTenantId = () => {
+      console.log('🏠 SelectTenant: Starting tenantId extraction...', {
+        hash: window.location.hash,
+        search: window.location.search,
+        localStorage: localStorage.getItem('currentTenantId'),
+        sessionStorage: sessionStorage.getItem('tenantId'),
+        href: window.location.href,
+        pathname: window.location.pathname
+      });
 
-    // 1. URL 해시에서 테넌트 ID 추출 (/#/tenantId)
-    let tenantIdFromUrl = '';
-    if (window.location.hash) {
-      const hashParts = window.location.hash.split('/');
-      if (hashParts.length >= 2 && hashParts[1]) {
-        tenantIdFromUrl = hashParts[1];
-        console.log('🏠 TenantId found in hash:', tenantIdFromUrl);
-      }
-    }
+      let tenantIdFromUrl = '';
 
-    // 2. 쿼리 파라미터에서 테넌트 ID 추출 (?tenantId=...)
-    if (!tenantIdFromUrl) {
+      // 1. 쿼리 파라미터에서 테넌트 ID 추출 (?tenantId=...) - 우선순위 높음
       const urlParams = new URLSearchParams(window.location.search);
       tenantIdFromUrl = urlParams.get('tenantId') || '';
       if (tenantIdFromUrl) {
         console.log('🏠 TenantId found in query params:', tenantIdFromUrl);
+        return tenantIdFromUrl;
       }
-    }
 
-    // 3. localStorage에서 테넌트 ID 추출
-    if (!tenantIdFromUrl) {
+      // 2. URL 해시에서 테넌트 ID 추출 (/#/tenantId 또는 /#/tenantId/)
+      if (window.location.hash) {
+        console.log('🏠 Raw hash:', window.location.hash);
+        
+        // #/a5da4160-5f17-4478-a9cd-535458a68cf3/ 형태에서 테넌트 ID 추출
+        const hash = window.location.hash;
+        if (hash.startsWith('#/')) {
+          // '#/' 이후 부분 추출하고 마지막 '/' 제거
+          const pathPart = hash.substring(2); // '#/' 제거
+          tenantIdFromUrl = pathPart.endsWith('/') ? pathPart.slice(0, -1) : pathPart;
+          console.log('🏠 TenantId extracted from hash:', tenantIdFromUrl);
+          if (tenantIdFromUrl) return tenantIdFromUrl;
+        }
+      }
+
+      // 3. localStorage에서 테넌트 ID 추출
       tenantIdFromUrl = localStorage.getItem('currentTenantId') || '';
       if (tenantIdFromUrl) {
         console.log('🏠 TenantId found in localStorage:', tenantIdFromUrl);
+        return tenantIdFromUrl;
       }
-    }
 
-    // 4. 찾은 테넌트 ID를 입력창에 자동 입력
-    if (tenantIdFromUrl && tenantIdFromUrl.trim()) {
-      console.log('🏠 Auto-filling tenantId:', tenantIdFromUrl);
-      setCustomTenantId(tenantIdFromUrl);
+      // 4. sessionStorage에서도 확인
+      tenantIdFromUrl = sessionStorage.getItem('tenantId') || '';
+      if (tenantIdFromUrl) {
+        console.log('🏠 TenantId found in sessionStorage:', tenantIdFromUrl);
+        return tenantIdFromUrl;
+      }
+
+      return '';
+    };
+
+    const foundTenantId = extractTenantId();
+    
+    if (foundTenantId && foundTenantId.trim()) {
+      console.log('🏠 Auto-filling tenantId:', foundTenantId);
       
-      // 자동 검증 트리거
-      setAutoValidate(tenantIdFromUrl);
+      // localStorage에 저장
+      localStorage.setItem('currentTenantId', foundTenantId);
+      sessionStorage.setItem('tenantId', foundTenantId);
+      console.log('🏠 Saved tenantId to storage:', foundTenantId);
+      
+      // 상태 업데이트를 다음 tick에서 실행
+      setTimeout(() => {
+        setCustomTenantId(foundTenantId);
+        console.log('🏠 State updated with tenantId:', foundTenantId);
+        
+        // 자동 검증 트리거
+        setAutoValidate(foundTenantId);
+      }, 100);
+    } else {
+      console.log('🏠 No tenantId found from any source');
     }
   }, []);
 
@@ -74,6 +106,22 @@ export default function SelectTenantPage() {
       setAutoValidate(null); // 한 번만 실행되도록
     }
   }, [autoValidate]);
+
+  // 추가 체크: 컴포넌트 마운트 후 입력창이 비어있으면 다시 시도
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!customTenantId) {
+        console.log('🏠 Input still empty, trying localStorage again...');
+        const storedTenantId = localStorage.getItem('currentTenantId');
+        if (storedTenantId) {
+          console.log('🏠 Found stored tenantId, filling input:', storedTenantId);
+          setCustomTenantId(storedTenantId);
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [customTenantId]);
 
   const validateTenant = async (tenantId: string) => {
     if (!tenantId.trim()) {
@@ -295,6 +343,53 @@ export default function SelectTenantPage() {
                   <p className="font-medium mb-1">AWS SaaS Factory 패턴</p>
                   <p>테넌트 ID를 입력하면 해시 기반 라우팅으로 애플리케이션이 초기화됩니다.</p>
                 </div>
+              </div>
+              
+              {/* 디버그 버튼 */}
+              <div className="mt-3 space-x-2 flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    const stored = localStorage.getItem('currentTenantId');
+                    console.log('🧪 Debug - localStorage:', stored);
+                    if (stored) {
+                      setCustomTenantId(stored);
+                      console.log('🧪 Debug - Filled input with:', stored);
+                    }
+                  }}
+                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded"
+                >
+                  디버그: localStorage 확인
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('🧪 Debug - Current URL:', window.location.href);
+                    console.log('🧪 Debug - Hash:', window.location.hash);
+                    console.log('🧪 Debug - Search:', window.location.search);
+                  }}
+                  className="text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded"
+                >
+                  디버그: URL 정보
+                </button>
+                <button
+                  onClick={() => {
+                    const testTenantId = 'a5da4160-5f17-4478-a9cd-535458a68cf3';
+                    setCustomTenantId(testTenantId);
+                    localStorage.setItem('currentTenantId', testTenantId);
+                    console.log('🧪 Debug - Set test tenant ID:', testTenantId);
+                  }}
+                  className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded"
+                >
+                  테스트: 테넌트 ID 설정
+                </button>
+                <button
+                  onClick={() => {
+                    // 원본 해시 URL로 직접 이동
+                    window.location.href = 'http://localhost:3001/#/a5da4160-5f17-4478-a9cd-535458a68cf3/';
+                  }}
+                  className="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+                >
+                  테스트: 해시 URL로 이동
+                </button>
               </div>
             </div>
           </div>

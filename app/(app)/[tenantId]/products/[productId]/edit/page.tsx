@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { productService } from '@/lib/services/product-service';
@@ -23,9 +23,8 @@ interface EditProductPageProps {
 }
 
 export default function EditProductPage({ params }: EditProductPageProps) {
-  const { tenantId: contextTenantId, tenantConfig, loading: tenantLoading, error: tenantError } = useTenant();
+  const { tenantId: contextTenantId } = useTenant();
   const auth = useAuth();
-  const router = useRouter();
   const { tenantId, productId } = use(params); // Promise를 unwrap
 
   useEffect(() => {
@@ -81,7 +80,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     if (auth.isAuthenticated && productId) {
       loadProduct();
     }
-  }, [auth.isAuthenticated, auth.user?.access_token, productId]);
+  }, [auth.isAuthenticated, auth.user?.access_token, productId, tenantId]);
 
   const handleInputChange = (field: keyof UpdateProductRequest, value: string | number) => {
     setFormData(prev => ({

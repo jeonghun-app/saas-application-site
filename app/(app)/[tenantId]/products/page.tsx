@@ -27,7 +27,7 @@ interface ProductPageProps {
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
-  const { tenantId: contextTenantId, tenantConfig, loading: tenantLoading, error: tenantError } = useTenant();
+  const { tenantId: contextTenantId } = useTenant();
   const auth = useAuth();
   const { tenantId } = use(params); // Promise를 unwrap
   

@@ -10,7 +10,7 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react';
-import { serviceHelper } from '@/lib/services/service-helper';
+
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { cn } from '@/lib/utils';
 

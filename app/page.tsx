@@ -13,29 +13,71 @@ export default function HomePage() {
 
   // 최초 진입 시 tenantId 체크 및 세팅 (쿼리 파라미터 & 해시 지원)
   useEffect(() => {
-    console.log('🏠 Checking for tenantId in URL...', {
-      search: window.location.search,
-      hash: window.location.hash
-    });
+    const extractTenantIdFromUrl = () => {
+      console.log('🏠 Starting tenantId extraction from URL...', {
+        href: window.location.href,
+        search: window.location.search,
+        hash: window.location.hash,
+        pathname: window.location.pathname
+      });
 
-    // 1. 쿼리 파라미터에서 확인
-    const urlParams = new URLSearchParams(window.location.search);
-    let tenantIdFromUrl = urlParams.get('tenantId');
-    
-    // 2. 해시에서 확인 (AWS SaaS Factory 패턴: /#/tenantId)
-    if (!tenantIdFromUrl && window.location.hash) {
-      const hashParts = window.location.hash.split('/');
-      if (hashParts.length >= 2 && hashParts[1]) {
-        tenantIdFromUrl = hashParts[1];
-        console.log('🏠 TenantId extracted from hash:', tenantIdFromUrl);
+      let tenantIdFromUrl = '';
+
+      // 1. 쿼리 파라미터에서 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      tenantIdFromUrl = urlParams.get('tenantId') || '';
+      if (tenantIdFromUrl) {
+        console.log('🏠 TenantId found in query params:', tenantIdFromUrl);
+        return tenantIdFromUrl;
       }
+      
+      // 2. 해시에서 확인 (AWS SaaS Factory 패턴: /#/tenantId)
+      if (window.location.hash) {
+        console.log('🏠 Raw hash in main page:', window.location.hash);
+        
+        const hash = window.location.hash;
+        if (hash.startsWith('#/')) {
+          // '#/' 이후 부분 추출하고 마지막 '/' 제거
+          const pathPart = hash.substring(2); // '#/' 제거
+          tenantIdFromUrl = pathPart.endsWith('/') ? pathPart.slice(0, -1) : pathPart;
+          console.log('🏠 TenantId extracted from hash in main page:', tenantIdFromUrl);
+          
+          if (tenantIdFromUrl && tenantIdFromUrl.trim()) {
+            return tenantIdFromUrl;
+          }
+        }
+      }
+
+      // 3. URL 경로에서 확인 (혹시 Next.js 라우팅으로 처리된 경우)
+      const pathname = window.location.pathname;
+      if (pathname.startsWith('/') && pathname.length > 1) {
+        const pathParts = pathname.split('/').filter(part => part.length > 0);
+        if (pathParts.length > 0) {
+          const possibleTenantId = pathParts[0];
+          // UUID 형태인지 간단 체크
+          if (possibleTenantId.includes('-') && possibleTenantId.length > 30) {
+            console.log('🏠 Possible tenantId found in pathname:', possibleTenantId);
+            return possibleTenantId;
+          }
+        }
+      }
+
+      return '';
+    };
+
+    const tenantIdFromUrl = extractTenantIdFromUrl();
+    
+    if (tenantIdFromUrl && tenantIdFromUrl.trim()) {
+      // 즉시 localStorage에 저장
+      localStorage.setItem('currentTenantId', tenantIdFromUrl);
+      sessionStorage.setItem('tenantId', tenantIdFromUrl);
+      console.log('🏠 TenantId extracted and saved:', tenantIdFromUrl);
     }
     
     const savedTenantId = localStorage.getItem('currentTenantId');
     
     if (tenantIdFromUrl) {
-      localStorage.setItem('currentTenantId', tenantIdFromUrl);
-      console.log('🏠 TenantId saved from URL:', tenantIdFromUrl);
+      console.log('🏠 TenantId found in URL:', tenantIdFromUrl);
       
       // OAuth 콜백 처리 중인지 확인 (code, error 파라미터 존재)
       const urlParams = new URLSearchParams(window.location.search);
@@ -49,9 +91,9 @@ export default function HomePage() {
       // 새로운 방문자만 테넌트 선택 페이지로 리다이렉트
       // (인증된 사용자는 나중에 대시보드로 리다이렉트됨)
       if (!auth.isAuthenticated && !auth.isLoading) {
-        console.log('🏠 New visitor with tenantId, redirecting to tenant selection...');
+        console.log('🏠 New visitor with tenantId, redirecting to tenant selection...', tenantIdFromUrl);
         setTimeout(() => {
-          window.location.href = '/select-tenant';
+          window.location.href = `/select-tenant?tenantId=${encodeURIComponent(tenantIdFromUrl)}`;
         }, 100);
       }
       return;
@@ -63,6 +105,7 @@ export default function HomePage() {
       setShowWelcome(true);
       return;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 콜백 처리 감지 및 상태 설정 (OAuth 및 logout 처리)
@@ -126,9 +169,12 @@ export default function HomePage() {
       console.log('🏠 Hash changed:', window.location.hash);
       
       if (window.location.hash) {
-        const hashParts = window.location.hash.split('/');
-        if (hashParts.length >= 2 && hashParts[1]) {
-          const newTenantId = hashParts[1];
+        // #/a5da4160-5f17-4478-a9cd-535458a68cf3/ 형태에서 테넌트 ID 추출
+        const hash = window.location.hash;
+        if (hash.startsWith('#/')) {
+          // '#/' 이후 부분 추출하고 마지막 '/' 제거
+          const pathPart = hash.substring(2); // '#/' 제거
+          const newTenantId = pathPart.endsWith('/') ? pathPart.slice(0, -1) : pathPart;
           const currentTenantId = localStorage.getItem('currentTenantId');
           
           if (newTenantId !== currentTenantId) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { ShoppingCart, DollarSign, Package, TrendingUp } from 'lucide-react';
+
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { useAuth } from 'react-oidc-context';
 import { serviceHelper } from '@/lib/services/service-helper';

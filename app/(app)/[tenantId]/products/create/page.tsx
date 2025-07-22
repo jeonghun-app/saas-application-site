@@ -22,9 +22,8 @@ interface CreateProductPageProps {
 }
 
 export default function CreateProductPage({ params }: CreateProductPageProps) {
-  const { tenantId: contextTenantId, tenantConfig, loading: tenantLoading, error: tenantError } = useTenant();
+  const { tenantId: contextTenantId } = useTenant();
   const auth = useAuth();
-  const router = useRouter();
   const { tenantId } = use(params); // Promise를 unwrap
 
   useEffect(() => {
