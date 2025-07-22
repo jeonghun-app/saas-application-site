@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { serviceHelper } from '@/lib/services/service-helper';
 import { tenantConfigService } from '@/lib/services/tenant-config-service';
@@ -17,6 +17,63 @@ export default function SelectTenantPage() {
     companyName?: string;
     plan?: string;
   } | null>(null);
+  const [autoValidate, setAutoValidate] = useState<string | null>(null);
+
+  // 페이지 로드 시 URL 해시나 localStorage에서 테넌트 ID 자동 입력
+  useEffect(() => {
+    console.log('🏠 SelectTenant: Checking for pre-filled tenantId...', {
+      hash: window.location.hash,
+      search: window.location.search,
+      localStorage: localStorage.getItem('currentTenantId')
+    });
+
+    // 1. URL 해시에서 테넌트 ID 추출 (/#/tenantId)
+    let tenantIdFromUrl = '';
+    if (window.location.hash) {
+      const hashParts = window.location.hash.split('/');
+      if (hashParts.length >= 2 && hashParts[1]) {
+        tenantIdFromUrl = hashParts[1];
+        console.log('🏠 TenantId found in hash:', tenantIdFromUrl);
+      }
+    }
+
+    // 2. 쿼리 파라미터에서 테넌트 ID 추출 (?tenantId=...)
+    if (!tenantIdFromUrl) {
+      const urlParams = new URLSearchParams(window.location.search);
+      tenantIdFromUrl = urlParams.get('tenantId') || '';
+      if (tenantIdFromUrl) {
+        console.log('🏠 TenantId found in query params:', tenantIdFromUrl);
+      }
+    }
+
+    // 3. localStorage에서 테넌트 ID 추출
+    if (!tenantIdFromUrl) {
+      tenantIdFromUrl = localStorage.getItem('currentTenantId') || '';
+      if (tenantIdFromUrl) {
+        console.log('🏠 TenantId found in localStorage:', tenantIdFromUrl);
+      }
+    }
+
+    // 4. 찾은 테넌트 ID를 입력창에 자동 입력
+    if (tenantIdFromUrl && tenantIdFromUrl.trim()) {
+      console.log('🏠 Auto-filling tenantId:', tenantIdFromUrl);
+      setCustomTenantId(tenantIdFromUrl);
+      
+      // 자동 검증 트리거
+      setAutoValidate(tenantIdFromUrl);
+    }
+  }, []);
+
+  // 자동 검증 처리
+  useEffect(() => {
+    if (autoValidate) {
+      console.log('🏠 Auto-validating tenantId:', autoValidate);
+      setTimeout(() => {
+        validateTenant(autoValidate);
+      }, 500);
+      setAutoValidate(null); // 한 번만 실행되도록
+    }
+  }, [autoValidate]);
 
   const validateTenant = async (tenantId: string) => {
     if (!tenantId.trim()) {

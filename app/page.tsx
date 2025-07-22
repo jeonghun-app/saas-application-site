@@ -11,20 +11,43 @@ export default function HomePage() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [isProcessingCallback, setIsProcessingCallback] = useState(false);
 
-  // 최초 진입 시 tenantId 체크 및 세팅
+  // 최초 진입 시 tenantId 체크 및 세팅 (쿼리 파라미터 & 해시 지원)
   useEffect(() => {
+    console.log('🏠 Checking for tenantId in URL...', {
+      search: window.location.search,
+      hash: window.location.hash
+    });
+
+    // 1. 쿼리 파라미터에서 확인
     const urlParams = new URLSearchParams(window.location.search);
-    const tenantIdFromUrl = urlParams.get('tenantId');
+    let tenantIdFromUrl = urlParams.get('tenantId');
+    
+    // 2. 해시에서 확인 (AWS SaaS Factory 패턴: /#/tenantId)
+    if (!tenantIdFromUrl && window.location.hash) {
+      const hashParts = window.location.hash.split('/');
+      if (hashParts.length >= 2 && hashParts[1]) {
+        tenantIdFromUrl = hashParts[1];
+        console.log('🏠 TenantId extracted from hash:', tenantIdFromUrl);
+      }
+    }
+    
     const savedTenantId = localStorage.getItem('currentTenantId');
     
     if (tenantIdFromUrl) {
       localStorage.setItem('currentTenantId', tenantIdFromUrl);
+      console.log('🏠 TenantId saved from URL:', tenantIdFromUrl);
+      
+      // 해시에서 테넌트 ID를 추출했으면 테넌트 선택 페이지로 리다이렉트
+      console.log('🏠 Redirecting to tenant selection with pre-filled tenantId...');
+      setTimeout(() => {
+        window.location.href = '/select-tenant';
+      }, 100);
       return;
     }
     
     // tenantId가 URL에도 없고 localStorage에도 없으면 웰컴 화면 표시
     if (!tenantIdFromUrl && !savedTenantId) {
-      console.log('No tenantId found, showing welcome screen');
+      console.log('🏠 No tenantId found, showing welcome screen');
       setShowWelcome(true);
       return;
     }
@@ -79,6 +102,34 @@ export default function HomePage() {
       }, 1000);
     }
   }, [isProcessingCallback, auth.isAuthenticated, auth.user]);
+
+  // 해시 변경 감지 (런타임에서 /#/tenantId 변경 시)
+  useEffect(() => {
+    const handleHashChange = () => {
+      console.log('🏠 Hash changed:', window.location.hash);
+      
+      if (window.location.hash) {
+        const hashParts = window.location.hash.split('/');
+        if (hashParts.length >= 2 && hashParts[1]) {
+          const newTenantId = hashParts[1];
+          const currentTenantId = localStorage.getItem('currentTenantId');
+          
+          if (newTenantId !== currentTenantId) {
+            console.log('🏠 TenantId changed in hash, updating...', {
+              old: currentTenantId,
+              new: newTenantId
+            });
+            localStorage.setItem('currentTenantId', newTenantId);
+            // 페이지 새로고침으로 새 테넌트 적용
+            window.location.reload();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // 인증 오류 처리
   useEffect(() => {
