@@ -3,17 +3,20 @@
 import { useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function AuthCallbackPage() {
   const auth = useAuth();
   const { tenantConfig } = useTenant();
+  const { redirectTo, locale } = useLocaleNavigation();
 
   console.log('🔐 AuthCallback render:', { 
     authLoading: auth.isLoading,
     authError: auth.error,
     isAuthenticated: auth.isAuthenticated,
-    user: !!auth.user
+    user: !!auth.user,
+    locale
   });
 
   // 인증 성공 시 대시보드로 리다이렉트
@@ -23,23 +26,24 @@ export default function AuthCallbackPage() {
       setTimeout(() => {
         const savedTenantId = localStorage.getItem('currentTenantId');
         if (savedTenantId) {
-          window.location.href = `/${savedTenantId}/dashboard`;
+          // locale을 유지하면서 dashboard로 리다이렉트
+          window.location.href = `/${locale}/${savedTenantId}/dashboard`;
         } else {
-          window.location.href = '/select-tenant';
+          redirectTo('/select-tenant');
         }
       }, 1000);
     }
-  }, [auth.isAuthenticated, auth.user]);
+  }, [auth.isAuthenticated, auth.user, redirectTo, locale]);
 
   // 인증 오류 시 로그인 페이지로 리다이렉트
   useEffect(() => {
     if (auth.error && !auth.isLoading) {
       console.error('🔐 Auth error, redirecting to login:', auth.error);
       setTimeout(() => {
-        window.location.href = '/auth/login?error=' + encodeURIComponent(auth.error?.message || 'Unknown error');
+        redirectTo('/auth/login?error=' + encodeURIComponent(auth.error?.message || 'Unknown error'));
       }, 3000);
     }
-  }, [auth.error, auth.isLoading]);
+  }, [auth.error, auth.isLoading, redirectTo]);
 
   // 로딩 중인 경우
   if (auth.isLoading) {

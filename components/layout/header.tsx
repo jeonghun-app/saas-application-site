@@ -5,6 +5,8 @@ import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { authInterceptor } from '@/lib/services/auth-interceptor';
 import { serviceHelper } from '@/lib/services/service-helper';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
+import LanguageSwitcher from '@/components/language-switcher';
 import { 
   Bell, 
   User, 
@@ -24,6 +26,7 @@ export function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const auth = useAuth();
   const { tenantId, clearTenant } = useTenant();
+  const { redirectTo } = useLocaleNavigation();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -87,13 +90,13 @@ export function Header() {
       
       // 5. 테넌트 선택 페이지로 즉시 리다이렉트
       setTimeout(() => {
-        window.location.href = '/select-tenant';
+        redirectTo('/select-tenant');
       }, 100);
       
     } catch (error) {
       console.error('🔐 Logout error:', error);
       // 에러가 발생해도 강제로 테넌트 선택 페이지로 이동
-      window.location.href = '/select-tenant';
+      redirectTo('/select-tenant');
     }
   };
 
@@ -150,6 +153,11 @@ export function Header() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Language Switcher */}
+          <div className="px-2">
+            <LanguageSwitcher />
           </div>
 
           {/* Notifications */}

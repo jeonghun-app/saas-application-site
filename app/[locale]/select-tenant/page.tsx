@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { serviceHelper } from '@/lib/services/service-helper';
 import { tenantConfigService } from '@/lib/services/tenant-config-service';
@@ -93,6 +93,7 @@ export default function SelectTenantPage() {
       }, 500);
       setAutoValidate(null); // 한 번만 실행되도록
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoValidate]);
 
   // 추가 체크: 컴포넌트 마운트 후 입력창이 비어있으면 다시 시도
@@ -109,7 +110,7 @@ export default function SelectTenantPage() {
     return () => clearTimeout(timer);
   }, [customTenantId]);
 
-  const validateTenant = async (tenantId: string) => {
+  const validateTenant = useCallback(async (tenantId: string) => {
     if (!tenantId.trim()) {
       setError(t('validation.enterTenantId'));
       return false;
@@ -154,7 +155,7 @@ export default function SelectTenantPage() {
     } finally {
       setValidating(false);
     }
-  };
+  }, [t, tCommon]);
 
   const handleTenantSelect = async (tenantId: string) => {
     

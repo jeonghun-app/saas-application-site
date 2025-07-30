@@ -9,7 +9,7 @@ import { Loader2, AlertCircle, Shield, LogOut, User } from 'lucide-react';
 export default function LoginPage() {
   const auth = useAuth();
   const { tenantId, tenantConfig } = useTenant();
-  const { redirectTo } = useLocaleNavigation();
+  const { redirectTo, locale } = useLocaleNavigation();
   const [error, setError] = useState<string | null>(null);
 
   // URL에서 에러 파라미터 확인
@@ -150,9 +150,9 @@ export default function LoginPage() {
                   onClick={() => {
                 const savedTenantId = localStorage.getItem('currentTenantId');
                 if (savedTenantId) {
-                  window.location.href = `/${savedTenantId}/dashboard`;
+                  window.location.href = `/${locale}/${savedTenantId}/dashboard`;
                 } else {
-                  window.location.href = '/select-tenant';
+                  redirectTo('/select-tenant');
                 }
               }}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200"
@@ -170,7 +170,7 @@ export default function LoginPage() {
                   </button>
                   
                   <button
-                    onClick={() => window.location.href = '/select-tenant'}
+                    onClick={() => redirectTo('/select-tenant')}
                     className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-4 rounded-xl transition-all duration-200"
                   >
                     테넌트 변경
@@ -241,7 +241,7 @@ export default function LoginPage() {
             </button>
             {/* Back Button */}
             <button
-              onClick={() => window.location.href = '/select-tenant'}
+              onClick={() => redirectTo('/select-tenant')}
               className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center"
             >
               다른 테넌트 선택

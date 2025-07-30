@@ -111,8 +111,7 @@ export default function HomePage() {
       setShowWelcome(true);
       return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [auth.isAuthenticated, auth.isLoading, redirectTo]);
 
   // 콜백 처리 감지 및 상태 설정 (OAuth 및 logout 처리)
   useEffect(() => {
@@ -150,7 +149,7 @@ export default function HomePage() {
         return;
       }
     }
-  }, []);
+  }, [redirectTo]);
 
   // 인증 완료 후 대시보드로 리다이렉트
   useEffect(() => {

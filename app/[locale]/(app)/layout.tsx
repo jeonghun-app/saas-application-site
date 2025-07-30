@@ -8,6 +8,7 @@ import { useAppInitializer } from '@/lib/hooks/use-app-initializer';
 import { serviceHelper } from '@/lib/services/service-helper';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
 import { Loader2, AlertCircle, Shield } from 'lucide-react';
 
 export default function AppLayout({
@@ -19,14 +20,15 @@ export default function AppLayout({
   const auth = useAuth();
   const { tenantId, tenantConfig } = useTenant();
   const { isInitialized, isLoading, error } = useAppInitializer();
+  const { redirectTo } = useLocaleNavigation();
 
   // 인증 가드 - 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
   useEffect(() => {
     if (!auth.isLoading && !auth.isAuthenticated) {
       console.log('🔐 User not authenticated, redirecting to login');
-      window.location.href = '/auth/login';
+      redirectTo('/auth/login');
     }
-  }, [auth.isLoading, auth.isAuthenticated]);
+  }, [auth.isLoading, auth.isAuthenticated, redirectTo]);
 
   // 해시 기반 라우팅 제거 - Next.js 파일 시스템 라우팅 사용
 

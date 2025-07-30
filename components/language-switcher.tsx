@@ -15,10 +15,16 @@ export default function LanguageSwitcher() {
   const switchLanguage = (newLocale: string) => {
     if (newLocale === locale) return;
     
-    // Remove current locale from pathname if it exists
-    const pathWithoutLocale = pathname.startsWith(`/${locale}`) 
-      ? pathname.slice(3) 
-      : pathname;
+    // Remove current locale from pathname more reliably
+    let pathWithoutLocale = pathname;
+    if (pathname.startsWith(`/${locale}`)) {
+      pathWithoutLocale = pathname.substring(locale.length + 1); // +1 for the slash
+    }
+    
+    // Ensure path starts with / if not empty
+    if (pathWithoutLocale && !pathWithoutLocale.startsWith('/')) {
+      pathWithoutLocale = '/' + pathWithoutLocale;
+    }
     
     // Construct new URL with new locale
     const newUrl = `/${newLocale}${pathWithoutLocale}`;
@@ -35,7 +41,7 @@ export default function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200 text-white"
+        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors duration-200"
         aria-label={t('language')}
       >
         <Globe className="h-4 w-4" />

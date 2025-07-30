@@ -1,10 +1,14 @@
 import createMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from './i18n/request';
 
 export default createMiddleware({
-  locales,
-  defaultLocale,
-  localeDetection: false
+  // A list of all locales that are supported
+  locales: ['ko', 'en'],
+  
+  // Used when no locale matches
+  defaultLocale: 'ko',
+  
+  // Always show locale in URL
+  localePrefix: 'always'
 });
 
 export const config = {

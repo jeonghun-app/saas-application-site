@@ -4,6 +4,10 @@ import { TenantProvider } from "@/lib/contexts/tenant-context";
 import { MultiTenantAuthProvider } from "@/lib/contexts/auth-provider";
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/request';
+import { Inter } from "next/font/google";
+import "../globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default async function LocaleLayout({
   children,
@@ -16,7 +20,7 @@ export default async function LocaleLayout({
   const { locale } = await params;
 
   // Validate locale using the same validation logic
-  if (!locale || !locales.includes(locale)) {
+  if (!locale || !locales.includes(locale as typeof locales[number])) {
     notFound();
   }
 
@@ -24,7 +28,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body>
+      <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <TenantProvider>
             <MultiTenantAuthProvider>
