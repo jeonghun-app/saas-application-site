@@ -30,7 +30,9 @@ export default function LanguageSwitcher() {
     const newUrl = `/${newLocale}${pathWithoutLocale}`;
     
     // Update locale preference in localStorage
-    localStorage.setItem('preferredLocale', newLocale);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('preferredLocale', newLocale);
+    }
     
     // Navigate to new URL
     router.push(newUrl);

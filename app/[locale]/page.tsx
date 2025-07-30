@@ -115,6 +115,8 @@ export default function HomePage() {
 
   // 콜백 처리 감지 및 상태 설정 (OAuth 및 logout 처리)
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
@@ -153,14 +155,14 @@ export default function HomePage() {
 
   // 인증 완료 후 대시보드로 리다이렉트
   useEffect(() => {
-    if (isProcessingCallback && auth.isAuthenticated && auth.user) {
+    if (isProcessingCallback && auth.isAuthenticated && auth.user && typeof window !== 'undefined') {
       console.log('🔐 Authentication completed via callback, redirecting to dashboard');
       // URL 정리 후 대시보드로 이동
       window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => {
         const savedTenantId = localStorage.getItem('currentTenantId');
         if (savedTenantId) {
-          window.location.href = `/${savedTenantId}/dashboard`;
+          redirectTo(`/${savedTenantId}/dashboard`);
         } else {
           redirectTo('/select-tenant');
         }

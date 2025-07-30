@@ -4,7 +4,7 @@ export class AuthInterceptor {
 
   private constructor() {
     if (typeof window !== 'undefined') {
-      this.authStorage = window.localStorage;
+      this.authStorage = typeof window !== 'undefined' ? window.localStorage : null;
     }
   }
 

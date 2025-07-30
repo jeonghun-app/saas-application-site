@@ -21,13 +21,13 @@ export default function AuthCallbackPage() {
 
   // 인증 성공 시 대시보드로 리다이렉트
   useEffect(() => {
-    if (auth.isAuthenticated && auth.user) {
+    if (auth.isAuthenticated && auth.user && typeof window !== 'undefined') {
       console.log('🔐 Authentication successful, redirecting to dashboard');
       setTimeout(() => {
         const savedTenantId = localStorage.getItem('currentTenantId');
         if (savedTenantId) {
           // locale을 유지하면서 dashboard로 리다이렉트
-          window.location.href = `/${locale}/${savedTenantId}/dashboard`;
+          redirectTo(`/${savedTenantId}/dashboard`);
         } else {
           redirectTo('/select-tenant');
         }
@@ -37,7 +37,7 @@ export default function AuthCallbackPage() {
 
   // 인증 오류 시 로그인 페이지로 리다이렉트
   useEffect(() => {
-    if (auth.error && !auth.isLoading) {
+    if (auth.error && !auth.isLoading && typeof window !== 'undefined') {
       console.error('🔐 Auth error, redirecting to login:', auth.error);
       setTimeout(() => {
         redirectTo('/auth/login?error=' + encodeURIComponent(auth.error?.message || 'Unknown error'));

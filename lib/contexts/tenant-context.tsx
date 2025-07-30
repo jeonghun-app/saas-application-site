@@ -62,9 +62,11 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      // localStorage 저장
+          // localStorage 저장
+    if (typeof window !== 'undefined') {
       localStorage.setItem('currentTenantId', id);
       console.log('🏠 Saved to localStorage:', id);
+    }
       
       // 상태 설정 (이미 같은 값이면 스킵)
       if (tenantId !== id) {
