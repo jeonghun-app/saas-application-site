@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
 import { Loader2, AlertCircle, Shield, LogOut, User } from 'lucide-react';
 
 export default function LoginPage() {
   const auth = useAuth();
   const { tenantId, tenantConfig } = useTenant();
+  const { redirectTo } = useLocaleNavigation();
   const [error, setError] = useState<string | null>(null);
 
   // URL에서 에러 파라미터 확인
@@ -53,11 +55,11 @@ export default function LoginPage() {
         if (savedTenantId) {
           window.location.href = `/${savedTenantId}/dashboard`;
         } else {
-          window.location.href = '/select-tenant';
+          redirectTo('/select-tenant');
         }
       }
     }
-  }, [auth.isAuthenticated, auth.user]);
+  }, [auth.isAuthenticated, auth.user, redirectTo]);
 
   // 로딩 중
   if (auth.isLoading) {

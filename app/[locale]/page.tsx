@@ -3,11 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
+import { useTranslations } from 'next-intl';
 import { Loader2, Building2, ArrowRight, Users, Shield, Zap } from 'lucide-react';
+import LanguageSwitcher from '@/components/language-switcher';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
 
 export default function HomePage() {
+  const t = useTranslations('home');
+  const tCommon = useTranslations('common');
   const auth = useAuth();
   const { tenantId } = useTenant();
+  const { redirectTo, replaceTo } = useLocaleNavigation();
   const [showWelcome, setShowWelcome] = useState(false);
   const [isProcessingCallback, setIsProcessingCallback] = useState(false);
 
@@ -93,7 +99,7 @@ export default function HomePage() {
       if (!auth.isAuthenticated && !auth.isLoading) {
         console.log('🏠 New visitor with tenantId, redirecting to tenant selection...', tenantIdFromUrl);
         setTimeout(() => {
-          window.location.href = `/select-tenant?tenantId=${encodeURIComponent(tenantIdFromUrl)}`;
+          redirectTo(`/select-tenant?tenantId=${encodeURIComponent(tenantIdFromUrl)}`);
         }, 100);
       }
       return;
@@ -126,7 +132,7 @@ export default function HomePage() {
         // URL에서 파라미터 제거하고 테넌트 선택 페이지로 이동
         window.history.replaceState({}, document.title, window.location.pathname);
         setTimeout(() => {
-          window.location.href = '/select-tenant';
+          redirectTo('/select-tenant');
         }, 500);
       }
       return;
@@ -157,11 +163,11 @@ export default function HomePage() {
         if (savedTenantId) {
           window.location.href = `/${savedTenantId}/dashboard`;
         } else {
-          window.location.href = '/select-tenant';
+          redirectTo('/select-tenant');
         }
       }, 1000);
     }
-  }, [isProcessingCallback, auth.isAuthenticated, auth.user]);
+  }, [isProcessingCallback, auth.isAuthenticated, auth.user, redirectTo]);
 
   // 해시 변경 감지 (런타임에서 /#/tenantId 변경 시)
   useEffect(() => {
@@ -213,37 +219,40 @@ export default function HomePage() {
       if (savedTenantId) {
         window.location.replace(`/${savedTenantId}/dashboard`);
       } else {
-        window.location.replace('/select-tenant');
+        replaceTo('/select-tenant');
       }
       return;
     }
     if (!tenantId && !auth.isLoading && !showWelcome) {
-      window.location.replace('/select-tenant');
+      replaceTo('/select-tenant');
       return;
     }
     if (tenantId && !auth.isAuthenticated && !auth.isLoading && !code) {
-      window.location.replace('/auth/login');
+      replaceTo('/auth/login');
       return;
     }
-  }, [auth.isAuthenticated, auth.user, auth.isLoading, tenantId, showWelcome]);
+  }, [auth.isAuthenticated, auth.user, auth.isLoading, tenantId, showWelcome, replaceTo]);
 
   // 콜백 처리 중 로딩 화면
   if (isProcessingCallback) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
             <Loader2 className="h-8 w-8 text-white animate-spin" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            로그인 처리 중
+            {t('processingLogin')}
           </h2>
           <p className="text-slate-600 mb-4">
-            Cognito 인증을 완료하고 있습니다...
+            {t('cognitoAuthMessage')}
           </p>
           {auth.error && (
             <p className="text-red-600 text-sm">
-              오류가 발생했습니다. 잠시 후 로그인 페이지로 이동합니다.
+              {t('authErrorMessage')}
             </p>
           )}
         </div>
@@ -255,6 +264,9 @@ export default function HomePage() {
   if (showWelcome) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
         <div className="container mx-auto px-4 py-16">
           {/* Header */}
           <div className="text-center mb-16">
@@ -262,10 +274,10 @@ export default function HomePage() {
               <Building2 className="h-10 w-10 text-white" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              AWS SaaS Factory
+              {t('title')}
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              멀티테넌트 SaaS 애플리케이션을 위한 최신 아키텍처 패턴과 베스트 프랙티스를 제공합니다.
+              {t('subtitle')}
             </p>
           </div>
 
@@ -275,34 +287,34 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">멀티테넌트</h3>
-              <p className="text-slate-600">테넌트별 격리된 환경에서 안전하고 확장 가능한 SaaS 서비스를 제공합니다.</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">{t('features.multitenant.title')}</h3>
+              <p className="text-slate-600">{t('features.multitenant.description')}</p>
             </div>
             
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 shadow-lg">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">보안 우선</h3>
-              <p className="text-slate-600">AWS Cognito와 IAM을 활용한 엔터프라이즈급 보안 및 인증 시스템을 제공합니다.</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">{t('features.security.title')}</h3>
+              <p className="text-slate-600">{t('features.security.description')}</p>
             </div>
             
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 shadow-lg">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">확장성</h3>
-              <p className="text-slate-600">AWS의 관리형 서비스를 활용하여 자동 확장 가능한 아키텍처를 구현합니다.</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">{t('features.scalability.title')}</h3>
+              <p className="text-slate-600">{t('features.scalability.description')}</p>
             </div>
           </div>
 
           {/* CTA */}
           <div className="text-center">
             <button
-              onClick={() => window.location.href = '/select-tenant'}
+              onClick={() => redirectTo('/select-tenant')}
               className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              <span>시작하기</span>
+              <span>{t('getStarted')}</span>
               <ArrowRight className="h-5 w-5" />
             </button>
             
@@ -316,7 +328,7 @@ export default function HomePage() {
                 }}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm"
               >
-                테스트: 테넌트 직접 설정
+                {t('test.setTenant')}
               </button>
               <button
                 onClick={() => {
@@ -325,19 +337,19 @@ export default function HomePage() {
                 }}
                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
               >
-                저장된 테넌트 확인
+                {t('test.checkTenant')}
               </button>
             </div>
             
             <p className="text-sm text-slate-500 mt-4">
-              테넌트 ID를 입력하여 애플리케이션에 접속하세요
+              {t('footer.description')}
             </p>
           </div>
 
           {/* Footer */}
           <div className="text-center mt-16 pt-8 border-t border-slate-200">
             <p className="text-slate-500">
-              Built with AWS SaaS Factory Reference Architecture
+              {t('footer.builtWith')}
             </p>
           </div>
         </div>
@@ -348,15 +360,18 @@ export default function HomePage() {
   if (auth.isLoading || new URLSearchParams(window.location.search).get('code')) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
             <Loader2 className="h-8 w-8 text-white animate-spin" />
           </div>
           <h2 className="text-xl font-semibold text-slate-900 mb-2">
-            {new URLSearchParams(window.location.search).get('code') ? '인증 처리 중...' : '앱을 시작하는 중...'}
+            {new URLSearchParams(window.location.search).get('code') ? t('authProcessingMessage') : t('startingApp')}
           </h2>
           <p className="text-slate-600">
-            잠시만 기다려주세요
+            {tCommon('waitMessage')}
           </p>
         </div>
       </div>
@@ -365,15 +380,18 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <div className="text-center">
         <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
           <Loader2 className="h-8 w-8 text-white animate-spin" />
         </div>
         <h2 className="text-xl font-semibold text-slate-900 mb-2">
-          AWS SaaS Factory
+          {t('title')}
         </h2>
         <p className="text-slate-600">
-          멀티테넌트 애플리케이션을 시작합니다...
+          {t('startingMultitenant')}
         </p>
       </div>
     </div>

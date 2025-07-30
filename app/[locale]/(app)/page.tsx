@@ -4,10 +4,12 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { serviceHelper } from '@/lib/services/service-helper';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
 
 export default function AppRootPage() {
   const router = useRouter();
   const { tenantId } = useTenant();
+  const { navigateTo } = useLocaleNavigation();
 
   useEffect(() => {
     // tenantId가 있으면 dashboard로 리다이렉트
@@ -20,10 +22,10 @@ export default function AppRootPage() {
         router.replace(`/${hashTenantId}/dashboard`);
       } else {
         // tenantId가 없으면 tenant 선택 페이지로
-        router.replace('/select-tenant');
+        navigateTo('/select-tenant');
       }
     }
-  }, [tenantId, router]);
+  }, [tenantId, router, navigateTo]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">

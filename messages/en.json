@@ -1,0 +1,153 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "language": "Language",
+    "korean": "Korean",
+    "english": "English",
+    "processing": "Processing...",
+    "validate": "Validate",
+    "company": "Company",
+    "plan": "Plan"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "AWS SaaS Factory",
+    "subtitle": "Provides the latest architectural patterns and best practices for multi-tenant SaaS applications.",
+    "processingLogin": "Processing Login",
+    "cognitoAuthMessage": "Completing Cognito authentication...",
+    "authErrorMessage": "An error occurred. You will be redirected to the login page shortly.",
+    "authProcessingMessage": "Processing authentication...",
+    "waitMessage": "Please wait a moment",
+    "startingApp": "Starting app...",
+    "startingMultitenant": "Starting multi-tenant application...",
+    "getStarted": "Get Started",
+    "features": {
+      "multitenant": {
+        "title": "Multi-tenant",
+        "description": "Provides secure and scalable SaaS services in an isolated environment for each tenant."
+      },
+      "security": {
+        "title": "Security First",
+        "description": "Provides enterprise-grade security and authentication system using AWS Cognito and IAM."
+      },
+      "scalability": {
+        "title": "Scalability",
+        "description": "Implements auto-scalable architecture using AWS managed services."
+      }
+    },
+    "test": {
+      "setTenant": "Test: Set Tenant Directly",
+      "checkTenant": "Check Saved Tenant"
+    },
+    "footer": {
+      "description": "Enter tenant ID to access the application",
+      "builtWith": "Built with AWS SaaS Factory Reference Architecture"
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "loginRequired": "Login required",
+    "authenticationFailed": "Authentication failed"
+  },
+  "tenant": {
+    "select": "Select Tenant",
+    "selectTenant": "Please select a tenant",
+    "tenantId": "Tenant ID",
+    "enterTenantId": "Enter the tenant ID to use",
+    "idPlaceholder": "e.g. a5da4160-5f17-4478-a9cd-535458a68cf3",
+    "selectButton": "Select Tenant",
+    "validation": {
+      "enterTenantId": "Please enter a tenant ID.",
+      "invalidTenant": "Invalid tenant ID. Please check and try again.",
+      "tenantNotFound": "Tenant ID not found. Please enter a valid tenant ID.",
+      "authRequired": "Authentication required. Please contact your administrator.",
+      "serverError": "Server error occurred. Please try again later.",
+      "validTenant": "Valid tenant",
+      "invalidTenantShort": "Invalid tenant"
+    },
+    "errors": {
+      "selectionError": "Error occurred while selecting tenant: ",
+      "unknownError": "Unknown error"
+    },
+    "demo": {
+      "title": "AWS SaaS Factory Pattern",
+      "description": "Enter the tenant ID to initialize the application with hash-based routing.",
+      "debugLocalStorage": "Debug: Check localStorage",
+      "debugUrl": "Debug: URL Information",
+      "testSetTenant": "Test: Set Tenant ID",
+      "testHashUrl": "Test: Navigate to Hash URL"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "loading": "Loading tenant configuration...",
+    "welcomeMessage": "Welcome back! Here's what's happening with your business.",
+    "stats": {
+      "totalOrders": "Total Orders",
+      "revenue": "Revenue",
+      "pendingOrders": "Pending Orders",
+      "fromLastMonth": "from last month"
+    },
+    "actions": {
+      "addProduct": "Add Product",
+      "addProductDesc": "Create a new product listing",
+      "newOrder": "New Order",
+      "newOrderDesc": "Create a new customer order",
+      "viewReports": "View Reports",
+      "viewReportsDesc": "Analyze business metrics",
+      "viewAnalytics": "View Analytics"
+    },
+    "errors": {
+      "tenantConfigError": "Tenant Configuration Error",
+      "selectTenantAgain": "Select Tenant Again",
+      "dashboardDataError": "An error occurred while loading dashboard data."
+    },
+    "auth": {
+      "loggedInAs": "Logged in as:",
+      "demoMode": "Demo Mode:",
+      "demoModeDesc": "Currently showing sample data. Login with Cognito to see real data."
+    },
+    "recentOrders": "Recent Orders",
+    "customerOrder": "Customer Order",
+    "tenantInfo": {
+      "title": "Tenant Information",
+      "tenantId": "Tenant ID",
+      "company": "Company",
+      "plan": "Plan",
+      "authentication": "Authentication",
+      "authenticated": "Authenticated",
+      "notAuthenticated": "Not Authenticated",
+      "authConfig": "Authentication Configuration",
+      "cognitoDomain": "Cognito Domain:",
+      "clientId": "Client ID:",
+      "tenantEmail": "Tenant Email:",
+      "productLimit": "Product Limit:",
+      "orderLimit": "Order Limit:"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "create": "Create Product",
+    "edit": "Edit Product",
+    "delete": "Delete Product",
+    "name": "Product Name",
+    "description": "Product Description",
+    "price": "Price"
+  }
+} 

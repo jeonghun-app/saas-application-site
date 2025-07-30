@@ -1,4 +1,4 @@
-import { Product, CreateProductRequest, UpdateProductRequest, DynamoDBProduct } from '@/lib/types/product';
+import { Product, CreateProductRequest, UpdateProductRequest } from '@/lib/types/product';
 
 export class ProductService {
   constructor() {

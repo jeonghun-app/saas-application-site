@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { TenantProvider } from "@/lib/contexts/tenant-context";
-import { MultiTenantAuthProvider } from "@/lib/contexts/auth-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,13 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html>
       <body className={inter.className}>
-        <TenantProvider>
-          <MultiTenantAuthProvider>
-            {children}
-          </MultiTenantAuthProvider>
-        </TenantProvider>
+        {children}
       </body>
     </html>
   );

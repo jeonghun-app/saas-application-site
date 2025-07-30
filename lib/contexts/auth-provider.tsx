@@ -71,8 +71,12 @@ export function MultiTenantAuthProvider({ children }: MultiTenantAuthProviderPro
 
   console.log('🔐 Simple AuthProvider:', { tenantId, hasConfig: !!tenantConfig, loading, error });
 
-  // /select-tenant 페이지에서는 인증 검사를 우회
-  if (typeof window !== 'undefined' && window.location.pathname === '/select-tenant') {
+  // /select-tenant 페이지에서는 인증 검사를 우회 (locale 포함)
+  if (typeof window !== 'undefined' && (
+    window.location.pathname === '/select-tenant' || 
+    window.location.pathname === '/ko/select-tenant' || 
+    window.location.pathname === '/en/select-tenant'
+  )) {
     console.log('🔐 On select-tenant page, bypassing auth checks');
     return <>{children}</>;
   }
@@ -100,7 +104,10 @@ export function MultiTenantAuthProvider({ children }: MultiTenantAuthProviderPro
           <h2 className="text-xl font-semibold text-slate-900 mb-2">설정 오류</h2>
           <p className="text-slate-600 mb-4">{error}</p>
           <button
-            onClick={() => window.location.href = '/select-tenant'}
+            onClick={() => {
+              const currentLocale = window.location.pathname.startsWith('/en') ? 'en' : 'ko';
+              window.location.href = `/${currentLocale}/select-tenant`;
+            }}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
           >
             테넌트 다시 선택
@@ -114,7 +121,8 @@ export function MultiTenantAuthProvider({ children }: MultiTenantAuthProviderPro
   if (!tenantId) {
     console.log('🔐 No tenantId, redirecting to select-tenant');
     if (typeof window !== 'undefined') {
-      window.location.href = '/select-tenant';
+      const currentLocale = window.location.pathname.startsWith('/en') ? 'en' : 'ko';
+      window.location.href = `/${currentLocale}/select-tenant`;
     }
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">

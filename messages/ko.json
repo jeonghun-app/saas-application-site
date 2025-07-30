@@ -1,0 +1,153 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "save": "저장",
+    "cancel": "취소",
+    "submit": "제출",
+    "back": "뒤로",
+    "next": "다음",
+    "continue": "계속",
+    "language": "언어",
+    "korean": "한국어",
+    "english": "English",
+    "processing": "처리 중...",
+    "validate": "검증",
+    "company": "회사",
+    "plan": "플랜"
+  },
+  "navigation": {
+    "home": "홈",
+    "dashboard": "대시보드",
+    "products": "제품",
+    "settings": "설정",
+    "logout": "로그아웃"
+  },
+  "home": {
+    "title": "AWS SaaS Factory",
+    "subtitle": "멀티테넌트 SaaS 애플리케이션을 위한 최신 아키텍처 패턴과 베스트 프랙티스를 제공합니다.",
+    "processingLogin": "로그인 처리 중",
+    "cognitoAuthMessage": "Cognito 인증을 완료하고 있습니다...",
+    "authErrorMessage": "오류가 발생했습니다. 잠시 후 로그인 페이지로 이동합니다.",
+    "authProcessingMessage": "인증 처리 중...",
+    "waitMessage": "잠시만 기다려주세요",
+    "startingApp": "앱을 시작하는 중...",
+    "startingMultitenant": "멀티테넌트 애플리케이션을 시작합니다...",
+    "getStarted": "시작하기",
+    "features": {
+      "multitenant": {
+        "title": "멀티테넌트",
+        "description": "테넌트별 격리된 환경에서 안전하고 확장 가능한 SaaS 서비스를 제공합니다."
+      },
+      "security": {
+        "title": "보안 우선",
+        "description": "AWS Cognito와 IAM을 활용한 엔터프라이즈급 보안 및 인증 시스템을 제공합니다."
+      },
+      "scalability": {
+        "title": "확장성",
+        "description": "AWS의 관리형 서비스를 활용하여 자동 확장 가능한 아키텍처를 구현합니다."
+      }
+    },
+    "test": {
+      "setTenant": "테스트: 테넌트 직접 설정",
+      "checkTenant": "저장된 테넌트 확인"
+    },
+    "footer": {
+      "description": "테넌트 ID를 입력하여 애플리케이션에 접속하세요",
+      "builtWith": "Built with AWS SaaS Factory Reference Architecture"
+    }
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "loginRequired": "로그인이 필요합니다",
+    "authenticationFailed": "인증에 실패했습니다"
+  },
+  "tenant": {
+    "select": "테넌트 선택",
+    "selectTenant": "테넌트를 선택하세요",
+    "tenantId": "테넌트 ID",
+    "enterTenantId": "사용할 테넌트 ID를 입력하세요",
+    "idPlaceholder": "예: a5da4160-5f17-4478-a9cd-535458a68cf3",
+    "selectButton": "테넌트 선택",
+    "validation": {
+      "enterTenantId": "테넌트 ID를 입력해주세요.",
+      "invalidTenant": "유효하지 않은 테넌트 ID입니다. 다시 확인해주세요.",
+      "tenantNotFound": "테넌트 ID를 찾을 수 없습니다. 올바른 테넌트 ID를 입력해주세요.",
+      "authRequired": "인증이 필요합니다. 관리자에게 문의하세요.",
+      "serverError": "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      "validTenant": "유효한 테넌트입니다",
+      "invalidTenantShort": "유효하지 않은 테넌트입니다"
+    },
+    "errors": {
+      "selectionError": "테넌트 선택 중 오류가 발생했습니다: ",
+      "unknownError": "알 수 없는 오류"
+    },
+    "demo": {
+      "title": "AWS SaaS Factory 패턴",
+      "description": "테넌트 ID를 입력하면 해시 기반 라우팅으로 애플리케이션이 초기화됩니다.",
+      "debugLocalStorage": "디버그: localStorage 확인",
+      "debugUrl": "디버그: URL 정보",
+      "testSetTenant": "테스트: 테넌트 ID 설정",
+      "testHashUrl": "테스트: 해시 URL로 이동"
+    }
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "welcome": "환영합니다",
+    "loading": "테넌트 설정을 불러오는 중...",
+    "welcomeMessage": "다시 오신 것을 환영합니다! 당신의 비즈니스에서 일어나고 있는 일들을 확인해보세요.",
+    "stats": {
+      "totalOrders": "총 주문",
+      "revenue": "수익",
+      "pendingOrders": "대기 중인 주문",
+      "fromLastMonth": "지난 달 대비"
+    },
+    "actions": {
+      "addProduct": "제품 추가",
+      "addProductDesc": "새 제품 목록 생성",
+      "newOrder": "새 주문",
+      "newOrderDesc": "새 고객 주문 생성",
+      "viewReports": "리포트 보기",
+      "viewReportsDesc": "비즈니스 지표 분석",
+      "viewAnalytics": "분석 보기"
+    },
+    "errors": {
+      "tenantConfigError": "테넌트 설정 오류",
+      "selectTenantAgain": "테넌트 다시 선택",
+      "dashboardDataError": "대시보드 데이터를 불러오는 중 오류가 발생했습니다."
+    },
+    "auth": {
+      "loggedInAs": "로그인 사용자:",
+      "demoMode": "데모 모드:",
+      "demoModeDesc": "현재 샘플 데이터를 보여주고 있습니다. 실제 데이터를 보려면 Cognito로 로그인하세요."
+    },
+    "recentOrders": "최근 주문",
+    "customerOrder": "고객 주문",
+    "tenantInfo": {
+      "title": "테넌트 정보",
+      "tenantId": "테넌트 ID",
+      "company": "회사",
+      "plan": "플랜",
+      "authentication": "인증",
+      "authenticated": "인증됨",
+      "notAuthenticated": "인증되지 않음",
+      "authConfig": "인증 설정",
+      "cognitoDomain": "Cognito 도메인:",
+      "clientId": "클라이언트 ID:",
+      "tenantEmail": "테넌트 이메일:",
+      "productLimit": "제품 제한:",
+      "orderLimit": "주문 제한:"
+    }
+  },
+  "products": {
+    "title": "제품",
+    "create": "제품 생성",
+    "edit": "제품 편집",
+    "delete": "제품 삭제",
+    "name": "제품명",
+    "description": "제품 설명",
+    "price": "가격"
+  }
+} 

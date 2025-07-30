@@ -13,7 +13,6 @@ import {
   CheckCircle 
 } from 'lucide-react';
 import { serviceHelper } from '@/lib/services/service-helper';
-import { useRouter } from 'next/navigation';
 
 interface CreateProductPageProps {
   params: Promise<{

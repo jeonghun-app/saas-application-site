@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { productService } from '@/lib/services/product-service';

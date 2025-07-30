@@ -4,6 +4,7 @@ import { useAuth } from 'react-oidc-context';
 import { useTenant } from '@/lib/contexts/tenant-context';
 import { authInterceptor } from '@/lib/services/auth-interceptor';
 import { serviceHelper } from '@/lib/services/service-helper';
+import { useLocaleNavigation } from '@/lib/utils/navigation';
 import { cn } from '@/lib/utils';
 
 interface LogoutButtonProps {
@@ -14,6 +15,7 @@ interface LogoutButtonProps {
 export default function LogoutButton({ children = 'Logout', className }: LogoutButtonProps) {
   const auth = useAuth();
   const { clearTenant } = useTenant();
+  const { redirectTo } = useLocaleNavigation();
 
   const handleLogout = async () => {
     try {
@@ -51,13 +53,13 @@ export default function LogoutButton({ children = 'Logout', className }: LogoutB
       
       // 4. 테넌트 선택 페이지로 즉시 리다이렉트
       setTimeout(() => {
-        window.location.href = '/select-tenant';
+        redirectTo('/select-tenant');
       }, 100);
       
     } catch (error) {
       console.error('🔐 Logout error:', error);
       // 에러가 발생해도 강제로 테넌트 선택 페이지로 이동
-      window.location.href = '/select-tenant';
+      redirectTo('/select-tenant');
     }
   };
 

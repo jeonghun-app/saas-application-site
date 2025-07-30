@@ -83,7 +83,8 @@ export class ServiceHelper {
       if (tenantId) {
         window.location.href = `/${tenantId}${path}`;
       } else {
-        window.location.href = '/select-tenant';
+        const currentLocale = window.location.pathname.startsWith('/en') ? 'en' : 'ko';
+        window.location.href = `/${currentLocale}/select-tenant`;
       }
     }
   }
