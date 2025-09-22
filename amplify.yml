@@ -4,7 +4,7 @@ frontend:
     preBuild:
       commands:
         - echo "Installing dependencies..."
-        - npm ci --legacy-peer-deps
+        - npm ci --legacy-peer-deps --silent
         - echo "Setting environment variables..."
         - export AWS_REGION=ap-northeast-2
         - export AWS_DEFAULT_REGION=ap-northeast-2
@@ -20,7 +20,7 @@ frontend:
     build:
       commands:
         - echo "Building the application..."
-        - npm run build
+        - npm run build --silent
         - echo "Build completed successfully"
   artifacts:
     baseDirectory: .next
@@ -31,3 +31,4 @@ frontend:
     paths:
       - node_modules/**/*
       - .next/cache/**/*
+      - .npm/**/*

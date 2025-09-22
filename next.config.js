@@ -1,9 +1,8 @@
-import type { NextConfig } from 'next';
-import createNextIntlPlugin from 'next-intl/plugin';
+const createNextIntlPlugin = require('next-intl/plugin');
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   // 해시 기반 라우팅 지원
   trailingSlash: false,
 
@@ -21,14 +20,11 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@aws-sdk/client-dynamodb'],
   transpilePackages: [],
 
-  // Next.js 15.0.3 호환성 설정
+  // Next.js 14.2.15 안정성 설정
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'localhost:3001', 'main.d5ub1n0zyzcoi.amplifyapp.com']
     },
-    // Next.js 15.0.3 안정성 설정
-    serverMinification: false,
-    optimizeCss: false,
   },
 
   // 빌드 최적화
@@ -86,8 +82,8 @@ const nextConfig: NextConfig = {
   // output: 'export',
   // distDir: 'out',
   
-  // Next.js 15.0.3 안정성 설정
+  // Next.js 14.2.15 안정성 설정
   compress: false,
 };
 
-export default withNextIntl(nextConfig);
+module.exports = withNextIntl(nextConfig);

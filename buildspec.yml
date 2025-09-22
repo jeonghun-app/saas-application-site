@@ -3,7 +3,7 @@ phases:
          pre_build:
            commands:
              - echo "Installing dependencies..."
-             - npm ci --legacy-peer-deps
+             - npm ci --legacy-peer-deps --silent
       - echo "Setting environment variables..."
       - export AWS_REGION=ap-northeast-2
       - export AWS_DEFAULT_REGION=ap-northeast-2
@@ -16,10 +16,10 @@ phases:
       - export NEXT_PUBLIC_APP_VERSION=1.0.0
       - echo "Checking environment variables..."
       - npm run check-env
-  build:
-    commands:
-      - echo "Building the application..."
-      - npm run build
+         build:
+           commands:
+             - echo "Building the application..."
+             - npm run build --silent
 artifacts:
   files:
     - '**/*'
