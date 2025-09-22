@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
   // 에러 처리 개선
   serverExternalPackages: ['@aws-sdk/client-dynamodb'],
 
+  // Next.js 15 호환성 설정
+  experimental: {
+    serverComponentsExternalPackages: ['@aws-sdk/client-dynamodb'],
+  },
+
   // 빌드 최적화
   webpack: (config, { isServer }) => {
     if (isServer) {
@@ -38,6 +43,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // 빌드 최적화
+  output: 'standalone',
 };
 
 export default withNextIntl(nextConfig);
