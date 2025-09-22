@@ -1,0 +1,81 @@
+
+> application-site@0.1.0 prebuild
+> npm run check-env
+
+
+> application-site@0.1.0 check-env
+> node scripts/check-env.js
+
+🔍 Environment Variables Check
+================================
+
+📋 Required Environment Variables:
+✅ AWS_REGION: ap-northeast-2
+✅ DYNAMODB_TABLE_NAME: product
+✅ NEXT_PUBLIC_CONTROL_PLANE_URL: https://5qlvawv3j3.execute-api.ap-northeast-2.amaz...
+✅ NEXT_PUBLIC_API_URL: https://023johxt48.execute-api.ap-northeast-2.amaz...
+✅ NEXT_PUBLIC_DOMAIN: main.d5ub1n0zyzcoi.amplifyapp.com
+
+📋 Optional Environment Variables:
+✅ NEXT_PUBLIC_USING_CUSTOM_DOMAIN: false
+✅ NEXT_PUBLIC_APP_NAME: SaaS Application Portal
+✅ NEXT_PUBLIC_APP_VERSION: 1.0.0
+
+🔐 AWS Credentials Check:
+⚠️  AWS credentials: Using IAM role (recommended for EC2)
+✅ AWS region: ap-northeast-2
+
+🟢 Node.js Environment:
+✅ Node.js version: v20.19.2
+✅ NODE_ENV: development
+✅ Memory usage: 4MB / 4MB
+
+================================
+✅ Environment check PASSED
+All required environment variables are set.
+
+> application-site@0.1.0 build
+> next build
+
+ ⚠ Invalid next.config.js options detected: 
+ ⚠     Unrecognized key(s) in object: 'serverExternalPackages'
+ ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+  ▲ Next.js 14.2.15
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                         Size     First Load JS
+┌ ○ /_not-found                                     873 B          88.1 kB
+├ ƒ /[locale]                                       3.4 kB          127 kB
+├ ƒ /[locale]/[tenantId]/dashboard                  5.27 kB         129 kB
+├ ƒ /[locale]/[tenantId]/products                   3.47 kB         127 kB
+├ ƒ /[locale]/[tenantId]/products/[productId]/edit  2.67 kB         112 kB
+├ ƒ /[locale]/[tenantId]/products/create            2.44 kB         112 kB
+├ ƒ /[locale]/auth/callback                         4.33 kB         124 kB
+├ ƒ /[locale]/auth/login                            5.35 kB         125 kB
+├ ƒ /[locale]/select-tenant                         3.73 kB         109 kB
+├ ƒ /api/health                                     0 B                0 B
+├ ƒ /api/products                                   0 B                0 B
+├ ƒ /api/products/[productId]                       0 B                0 B
+└ ƒ /api/tenant-config                              0 B                0 B
++ First Load JS shared by all                       87.2 kB
+  ├ chunks/117-0b3dc364cdc9df0d.js                  31.6 kB
+  ├ chunks/fd9d1056-c0235ce0a644fd1e.js             53.6 kB
+  └ other shared chunks (total)                     1.96 kB
+
+
+ƒ Middleware                                        37.6 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

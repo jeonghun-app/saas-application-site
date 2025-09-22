@@ -1,8 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { TenantProvider } from "@/lib/contexts/tenant-context";
-import { MultiTenantAuthProvider } from "@/lib/contexts/auth-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import Providers from "@/components/providers";
 import { locales, defaultLocale } from '@/i18n/request';
 import { Inter } from "next/font/google";
 import "../globals.css";
@@ -16,13 +15,11 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  // Await params before accessing properties
   const { locale } = await params;
 
-  // Validate locale using the same validation logic
+  // Validate locale
   if (!locale || !locales.includes(locale as typeof locales[number])) {
     console.warn('Invalid locale provided:', locale, 'falling back to default:', defaultLocale);
-    // Instead of notFound(), redirect to default locale
     const redirectUrl = `/${defaultLocale}`;
     return (
       <html lang={defaultLocale}>
@@ -44,11 +41,9 @@ export default async function LocaleLayout({
       <body className={inter.className}>
         <ErrorBoundary>
           <NextIntlClientProvider messages={messages}>
-            <TenantProvider>
-              <MultiTenantAuthProvider>
-                {children}
-              </MultiTenantAuthProvider>
-            </TenantProvider>
+            <Providers>
+              {children}
+            </Providers>
           </NextIntlClientProvider>
         </ErrorBoundary>
       </body>

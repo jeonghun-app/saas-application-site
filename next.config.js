@@ -17,7 +17,6 @@ const nextConfig = {
   },
 
   // 에러 처리 개선 - 충돌 해결
-  serverExternalPackages: ['@aws-sdk/client-dynamodb'],
   transpilePackages: [],
 
   // Next.js 14.2.15 호환성 설정
