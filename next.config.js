@@ -5,6 +5,11 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const nextConfig = {
   // 해시 기반 라우팅 지원
   trailingSlash: false,
+  
+  // App Router 비활성화 (Pages Router 사용)
+  experimental: {
+    appDir: false,
+  },
 
   // 환경 변수 설정 - Amplify에서 설정된 값들 사용
   env: {
@@ -26,6 +31,12 @@ const nextConfig = {
     },
     // clientModules 오류 해결을 위한 설정
     serverComponentsExternalPackages: ['@aws-sdk/client-dynamodb'],
+    // App Router 최적화
+    optimizePackageImports: ['lucide-react'],
+    // clientModules 버그 해결
+    serverMinification: false,
+    optimizeCss: false,
+    esmExternals: false,
   },
 
   // 빌드 최적화
@@ -41,15 +52,18 @@ const nextConfig = {
       ...config.resolve.alias,
       'next/dist/client/components/static-generation-bailout': false,
       'next/dist/client/components/static-generation-bailout.js': false,
+      'client-reference-manifest': false,
     };
     
-    // Next.js 15 clientReferenceManifest 버그 완전 우회
+    // Next.js 14 clientModules 버그 완전 우회
     config.plugins = config.plugins || [];
     config.plugins.push(
       new webpack.DefinePlugin({
         'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST': 'undefined',
         'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST_LOADER': 'undefined',
         'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST_LOADER_JS': 'undefined',
+        '__NEXT_CLIENT_REFERENCE_MANIFEST': 'undefined',
+        'clientModules': 'undefined',
       })
     );
     
@@ -58,6 +72,12 @@ const nextConfig = {
     config.module.rules = config.module.rules || [];
     config.module.rules.push({
       test: /client-reference-manifest/,
+      use: 'null-loader'
+    });
+    
+    // clientModules 관련 모듈 제거
+    config.module.rules.push({
+      test: /clientModules/,
       use: 'null-loader'
     });
     
