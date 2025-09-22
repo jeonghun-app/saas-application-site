@@ -21,13 +21,14 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@aws-sdk/client-dynamodb'],
   transpilePackages: [],
 
-  // Next.js 15 호환성 설정 - clientReferenceManifest 버그 해결
+  // Next.js 15.0.3 호환성 설정
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'localhost:3001', 'main.d5ub1n0zyzcoi.amplifyapp.com']
     },
-    // Next.js 15 버그 우회
+    // Next.js 15.0.3 안정성 설정
     serverMinification: false,
+    optimizeCss: false,
   },
 
   // 빌드 최적화
@@ -42,15 +43,26 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       'next/dist/client/components/static-generation-bailout': false,
+      'next/dist/client/components/static-generation-bailout.js': false,
     };
     
-    // Next.js 15 clientReferenceManifest 버그 우회
+    // Next.js 15 clientReferenceManifest 버그 완전 우회
     config.plugins = config.plugins || [];
     config.plugins.push(
       new webpack.DefinePlugin({
         'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST': 'undefined',
+        'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST_LOADER': 'undefined',
+        'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST_LOADER_JS': 'undefined',
       })
     );
+    
+    // clientReferenceManifest 관련 모듈 제거
+    config.module = config.module || {};
+    config.module.rules = config.module.rules || [];
+    config.module.rules.push({
+      test: /client-reference-manifest/,
+      use: 'null-loader'
+    });
     
     return config;
   },
@@ -73,6 +85,9 @@ const nextConfig: NextConfig = {
   // Amplify 배포를 위한 설정 (정적 내보내기 비활성화)
   // output: 'export',
   // distDir: 'out',
+  
+  // Next.js 15.0.3 안정성 설정
+  compress: false,
 };
 
 export default withNextIntl(nextConfig);
