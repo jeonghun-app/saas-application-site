@@ -5,13 +5,9 @@ export class TenantConfigService {
   private readonly configUrl: string;
 
   constructor() {
-    // 개발 환경에서는 Next.js API 프록시 사용, 프로덕션에서는 직접 호출
-    if (process.env.NODE_ENV === 'development') {
-      this.configUrl = '/api/tenant-config';
-    } else {
-      const controlPlaneUrl = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL || 'https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/';
-      this.configUrl = `${controlPlaneUrl}tenant-config`;
-    }
+    // 정적 내보내기에서는 항상 직접 Control Plane API 호출
+    const controlPlaneUrl = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL || 'https://5qlvawv3j3.execute-api.ap-northeast-2.amazonaws.com/';
+    this.configUrl = controlPlaneUrl;
   }
 
   // 테스트용 샘플 ConfigParams - 개발 환경에서만 사용
@@ -59,7 +55,7 @@ export class TenantConfigService {
   // AWS SaaS Factory 패턴: ConfigParams 조회 (앱 초기화용)
   async getConfigParams(tenantId: string): Promise<ConfigParams> {
     try {
-      const url = `${this.configUrl}?tenantId=${tenantId}`;
+      const url = `${this.configUrl}tenant-config?tenantId=${tenantId}`;
       
       console.log('🌐 API Request URL:', url);
       console.log('🌐 Environment:', process.env.NODE_ENV);

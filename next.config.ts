@@ -34,18 +34,24 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  // 에러 페이지 설정
-  async rewrites() {
-    return [
-      {
-        source: '/health',
-        destination: '/api/health',
-      },
-    ];
-  },
+  // 정적 내보내기에서는 rewrites 사용 불가
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/health',
+  //       destination: '/api/health',
+  //     },
+  //   ];
+  // },
 
-  // 빌드 최적화
-  output: 'standalone',
+  // Amplify 배포 최적화
+  images: {
+    unoptimized: true,
+  },
+  
+  // Amplify 배포를 위한 설정 (정적 내보내기 비활성화)
+  // output: 'export',
+  // distDir: 'out',
 };
 
 export default withNextIntl(nextConfig);

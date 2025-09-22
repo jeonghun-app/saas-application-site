@@ -21,10 +21,12 @@ frontend:
       commands:
         - echo "Building the application..."
         - npm run build
+        - echo "Build completed successfully"
   artifacts:
     baseDirectory: .next
     files:
       - '**/*'
+  appRoot: .
   cache:
     paths:
       - node_modules/**/*
