@@ -17,20 +17,41 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
   },
 
-  // 에러 처리 개선
+  // 에러 처리 개선 - 충돌 해결
   serverExternalPackages: ['@aws-sdk/client-dynamodb'],
+  transpilePackages: [],
 
-  // Next.js 15 호환성 설정
+  // Next.js 15 호환성 설정 - clientReferenceManifest 버그 해결
   experimental: {
-    serverComponentsExternalPackages: ['@aws-sdk/client-dynamodb'],
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'localhost:3001', 'main.d5ub1n0zyzcoi.amplifyapp.com']
+    },
+    // Next.js 15 버그 우회
+    serverMinification: false,
   },
 
   // 빌드 최적화
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (isServer) {
       // 서버 사이드에서 사용하지 않는 패키지 제외
       config.externals.push('@aws-sdk/client-dynamodb');
     }
+    
+    // clientReferenceManifest 버그 우회를 위한 설정
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'next/dist/client/components/static-generation-bailout': false,
+    };
+    
+    // Next.js 15 clientReferenceManifest 버그 우회
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env.__NEXT_CLIENT_REFERENCE_MANIFEST': 'undefined',
+      })
+    );
+    
     return config;
   },
 
