@@ -1,0 +1,35 @@
+type Tenant @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  tenantId: String!
+  name: String!
+  email: String!
+  plan: String!
+  status: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Product @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  tenantId: String!
+  name: String!
+  description: String
+  price: Float
+  currency: String
+  interestRate: Float
+  status: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Order @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  tenantId: String!
+  productId: String!
+  customerId: String!
+  quantity: Int!
+  totalAmount: Float!
+  status: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}

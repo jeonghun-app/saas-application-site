@@ -1,0 +1,12 @@
+{
+  "lambdaLayers": [],
+  "permissions": {
+    "api": [
+      {
+        "type": "function",
+        "name": "saasapplication",
+        "operation": "invoke"
+      }
+    ]
+  }
+}

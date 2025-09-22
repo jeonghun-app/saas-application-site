@@ -1,0 +1,9 @@
+{
+  "bucketName": "saasapplication-storage",
+  "policyUUID": "saasapplication-storage-policy",
+  "storageAccess": "auth",
+  "unauthPolicyName": "saasapplication-storage-unauth",
+  "authPolicyName": "saasapplication-storage-auth",
+  "unauthRoleName": "saasapplication-storage-unauth-role",
+  "authRoleName": "saasapplication-storage-auth-role"
+}
