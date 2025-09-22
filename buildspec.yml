@@ -1,9 +1,9 @@
 version: 1.0
 phases:
-  pre_build:
-    commands:
-      - echo "Installing dependencies..."
-      - npm ci
+         pre_build:
+           commands:
+             - echo "Installing dependencies..."
+             - npm ci --legacy-peer-deps
       - echo "Setting environment variables..."
       - export AWS_REGION=ap-northeast-2
       - export AWS_DEFAULT_REGION=ap-northeast-2
