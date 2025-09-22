@@ -20,9 +20,13 @@ const nextConfig = {
   serverExternalPackages: ['@aws-sdk/client-dynamodb'],
   transpilePackages: [],
 
-  // Next.js 13.5.6 안정성 설정
+  // Next.js 14.2.15 호환성 설정
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'localhost:3001', 'main.d5ub1n0zyzcoi.amplifyapp.com']
+    },
+    // clientModules 오류 해결을 위한 설정
+    serverComponentsExternalPackages: ['@aws-sdk/client-dynamodb'],
   },
 
   // 빌드 최적화
