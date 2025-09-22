@@ -15,28 +15,36 @@ export default function LanguageSwitcher() {
   const switchLanguage = (newLocale: string) => {
     if (newLocale === locale) return;
     
-    // Remove current locale from pathname more reliably
-    let pathWithoutLocale = pathname;
-    if (pathname.startsWith(`/${locale}`)) {
-      pathWithoutLocale = pathname.substring(locale.length + 1); // +1 for the slash
+    try {
+      // Remove current locale from pathname more reliably
+      let pathWithoutLocale = pathname;
+      if (pathname.startsWith(`/${locale}`)) {
+        pathWithoutLocale = pathname.substring(locale.length + 1); // +1 for the slash
+      }
+      
+      // Ensure path starts with / if not empty
+      if (pathWithoutLocale && !pathWithoutLocale.startsWith('/')) {
+        pathWithoutLocale = '/' + pathWithoutLocale;
+      }
+      
+      // Construct new URL with new locale
+      const newUrl = `/${newLocale}${pathWithoutLocale}`;
+      
+      // Update locale preference in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('preferredLocale', newLocale);
+      }
+      
+      // Navigate to new URL
+      router.push(newUrl);
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error switching language:', error);
+      // Fallback: simple redirect to root with new locale
+      if (typeof window !== 'undefined') {
+        window.location.href = `/${newLocale}`;
+      }
     }
-    
-    // Ensure path starts with / if not empty
-    if (pathWithoutLocale && !pathWithoutLocale.startsWith('/')) {
-      pathWithoutLocale = '/' + pathWithoutLocale;
-    }
-    
-    // Construct new URL with new locale
-    const newUrl = `/${newLocale}${pathWithoutLocale}`;
-    
-    // Update locale preference in localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('preferredLocale', newLocale);
-    }
-    
-    // Navigate to new URL
-    router.push(newUrl);
-    setIsOpen(false);
   };
 
   return (

@@ -6,23 +6,63 @@ import {
   ScanCommandInput 
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { ApiErrorHandler, validateEnvironmentVariables } from '@/lib/utils/error-handler';
 
 // DynamoDB 클라이언트 설정
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'ap-northeast-2',
   // EC2 인스턴스에서 IAM 역할 자격 증명 사용
   credentials: undefined, // 기본 자격 증명 체인 사용
+  maxAttempts: 3, // 재시도 횟수
+  retryMode: 'adaptive', // 적응형 재시도
 });
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'product';
 
+// DynamoDB 연결 상태 확인
+async function checkDynamoDBConnection(): Promise<boolean> {
+  try {
+    const command = new ScanCommand({
+      TableName: TABLE_NAME,
+      Limit: 1
+    });
+    await client.send(command);
+    return true;
+  } catch (error) {
+    console.error('DynamoDB connection check failed:', error);
+    return false;
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
+    // 환경 변수 검증
+    const envCheck = validateEnvironmentVariables();
+    if (!envCheck.isValid) {
+      return NextResponse.json(
+        { 
+          error: 'Configuration error', 
+          message: `Missing required environment variables: ${envCheck.missing.join(', ')}`,
+          code: 'CONFIG_ERROR'
+        },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
 
     if (!tenantId) {
       return NextResponse.json({ error: 'tenantId is required' }, { status: 400 });
+    }
+
+    // DynamoDB 연결 상태 확인
+    const isConnected = await checkDynamoDBConnection();
+    if (!isConnected) {
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 503 }
+      );
     }
 
     console.log('🗄️ DynamoDB Products GET Request for tenantId:', tenantId);
@@ -64,11 +104,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('🗄️ DynamoDB error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error);
   }
 }
 
@@ -119,11 +155,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('🗄️ DynamoDB error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error);
   }
 }
 

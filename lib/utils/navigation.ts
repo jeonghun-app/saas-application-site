@@ -7,21 +7,38 @@ export function useLocaleNavigation() {
   const router = useRouter();
 
   const navigateTo = (path: string) => {
-    const localizedPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
-    router.push(localizedPath);
+    try {
+      const localizedPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
+      router.push(localizedPath);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to window.location
+      if (typeof window !== 'undefined') {
+        const fallbackPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
+        window.location.href = fallbackPath;
+      }
+    }
   };
 
   const redirectTo = (path: string) => {
-    const localizedPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
-    if (typeof window !== 'undefined') {
-      window.location.href = localizedPath;
+    try {
+      const localizedPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
+      if (typeof window !== 'undefined') {
+        window.location.href = localizedPath;
+      }
+    } catch (error) {
+      console.error('Redirect error:', error);
     }
   };
 
   const replaceTo = (path: string) => {
-    const localizedPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
-    if (typeof window !== 'undefined') {
-      window.location.replace(localizedPath);
+    try {
+      const localizedPath = path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
+      if (typeof window !== 'undefined') {
+        window.location.replace(localizedPath);
+      }
+    } catch (error) {
+      console.error('Replace error:', error);
     }
   };
 

@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-env": "node scripts/check-env.js",
+    "prebuild": "npm run check-env",
+    "health": "curl -f http://localhost:3000/api/health || exit 1"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.848.0",

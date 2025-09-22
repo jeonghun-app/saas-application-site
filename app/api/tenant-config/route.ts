@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ApiErrorHandler } from '@/lib/utils/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,13 +18,19 @@ export async function GET(request: NextRequest) {
     
     console.log('🌐 Forwarding to:', apiUrl);
     
+    // 타임아웃과 재시도 로직 추가
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+    
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     });
 
+    clearTimeout(timeoutId);
     console.log('🌐 AWS API Response status:', response.status);
 
     if (!response.ok) {
@@ -48,11 +55,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('🌐 Proxy Error:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error);
   }
 }
 

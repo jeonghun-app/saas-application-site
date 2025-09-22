@@ -15,7 +15,11 @@
     "processing": "처리 중...",
     "validate": "검증",
     "company": "회사",
-    "plan": "플랜"
+    "plan": "플랜",
+    "unexpectedError": "예상치 못한 오류가 발생했습니다",
+    "pageRefresh": "페이지 새로고침",
+    "tryAgain": "다시 시도",
+    "errorDetails": "오류 세부사항"
   },
   "navigation": {
     "home": "홈",

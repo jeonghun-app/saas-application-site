@@ -65,13 +65,19 @@ export class TenantConfigService {
       console.log('🌐 Environment:', process.env.NODE_ENV);
       console.log('🌐 Control Plane URL:', this.configUrl);
       
+      // 타임아웃과 재시도 로직 추가
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15초 타임아웃
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       console.log('🌐 API Response status:', response.status);
       console.log('🌐 API Response headers:', Object.fromEntries(response.headers.entries()));
 
@@ -79,8 +85,16 @@ export class TenantConfigService {
         const errorText = await response.text();
         console.error('🌐 API Error Response:', errorText);
         
-        // 실제 오류를 던져서 사용자가 문제를 알 수 있도록 함
-        throw new Error(`API 오류 (${response.status}): ${errorText || response.statusText}`);
+        // HTTP 상태 코드별 에러 메시지
+        if (response.status === 404) {
+          throw new Error(`테넌트를 찾을 수 없습니다: ${tenantId}`);
+        } else if (response.status === 403) {
+          throw new Error(`테넌트 접근 권한이 없습니다: ${tenantId}`);
+        } else if (response.status >= 500) {
+          throw new Error(`서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요. (${response.status})`);
+        } else {
+          throw new Error(`API 오류 (${response.status}): ${errorText || response.statusText}`);
+        }
       }
 
       const data: ConfigParams = await response.json();
@@ -93,6 +107,11 @@ export class TenantConfigService {
       // 네트워크 오류의 경우 더 구체적인 오류 메시지
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error(`네트워크 연결 오류: Control Plane API(${this.configUrl})에 접근할 수 없습니다.`);
+      }
+      
+      // AbortError (타임아웃) 처리
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`요청 시간이 초과되었습니다. 네트워크 상태를 확인해주세요.`);
       }
       
       // 다른 오류는 그대로 재던짐

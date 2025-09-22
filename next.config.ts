@@ -16,6 +16,28 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'SaaS Application Portal',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
   },
+
+  // 에러 처리 개선
+  serverExternalPackages: ['@aws-sdk/client-dynamodb'],
+
+  // 빌드 최적화
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // 서버 사이드에서 사용하지 않는 패키지 제외
+      config.externals.push('@aws-sdk/client-dynamodb');
+    }
+    return config;
+  },
+
+  // 에러 페이지 설정
+  async rewrites() {
+    return [
+      {
+        source: '/health',
+        destination: '/api/health',
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
